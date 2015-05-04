@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Algorythms</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="scan">SCAN</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="game_desc">gameDescription</string>
+</resources>
