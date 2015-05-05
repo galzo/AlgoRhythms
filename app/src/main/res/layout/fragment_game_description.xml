@@ -4,20 +4,21 @@
     android:background="@android:color/white"
     tools:context="com.algorythmsteam.algorythms.GameDescriptionFragment">
 
-    <RelativeLayout
-        android:animateLayoutChanges="true"
-        android:layout_width="match_parent"
-        android:layout_centerInParent="true"
-        android:layout_height="wrap_content">
+    <ImageView
+        android:id="@+id/game_description_background_grid"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:alpha="0"
+        android:paddingRight="-100dp"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        android:src="@drawable/game_desc_background"/>
 
     <VideoView
-        android:visibility="invisible"
         android:id="@+id/game_description_video"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"/>
-        
-    </RelativeLayout>
     
     <RelativeLayout
         android:id="@+id/video_hider"
@@ -26,23 +27,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <TextView
+    <ImageView
         android:id="@+id/game_description_title"
-        android:text="@string/game_desc"
-        android:textColor="@android:color/black"
-        android:textSize="32sp"
-        android:layout_centerInParent="true"
-        android:visibility="invisible"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:src="@drawable/bubble_sort_title"
+        android:alpha="0"
+        android:layout_width="200dp"
+        android:layout_height="80dp"
+        android:layout_centerInParent="true"/>
 
     <TextView
         android:id="@+id/game_description_category"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
+        android:alpha="0"
+        android:textSize="17sp"
         android:text="gameCategory"
-        android:visibility="invisible"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/game_description_title"
         android:textColor="@android:color/holo_red_dark"/>

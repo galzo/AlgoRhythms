@@ -1,8 +1,11 @@
 package com.algorythmsteam.algorythms;
 
+import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.TimeInterpolator;
 import android.content.res.Resources;
+import android.graphics.Interpolator;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -14,11 +17,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.handlers.AnimationHandler;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.AnticipateOvershootInterpolator;
@@ -32,15 +38,38 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
 
 
 /**
  * A placeholder fragment containing a simple view.
  */
 public class AlgoryhmsMainFragment extends Fragment
-        implements OnClickListener, Animation.AnimationListener {
+        implements OnClickListener, Animator.AnimatorListener {
     public static final String TAG = "AlgoryhmsMainFragment";
 
+    @Override
+    public void onAnimationStart(Animator animation) {
+
+    }
+
+    @Override
+    public void onAnimationEnd(Animator animation) {
+        scanButton.setOnClickListener(AlgoryhmsMainFragment.this);
+        buzzerButton.setOnClickListener(AlgoryhmsMainFragment.this);
+        aboutButton.setOnClickListener(AlgoryhmsMainFragment.this);
+        isAnimInit = true;
+    }
+
+    @Override
+    public void onAnimationCancel(Animator animation) {
+
+    }
+
+    @Override
+    public void onAnimationRepeat(Animator animation) {
+
+    }
 
     public interface QRCodeScanHandler {
         void initiateScan();
@@ -48,10 +77,9 @@ public class AlgoryhmsMainFragment extends Fragment
 
     private View root;
     private boolean isAnimInit;
-    private TextView formatTxt, contentTxt;
     private QRCodeScanHandler scannerActivity;
     private ImageView splashIcon, backgroundGrid;
-    private ImageButton scanButton;
+    private ImageButton scanButton, buzzerButton, aboutButton;
 
     public AlgoryhmsMainFragment() {
         super();
@@ -76,11 +104,11 @@ public class AlgoryhmsMainFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_algoryhms_main, container, false);
-        formatTxt = (TextView) root.findViewById(R.id.scan_format);
-        contentTxt = (TextView) root.findViewById(R.id.scan_content);
         splashIcon = (ImageView) root.findViewById(R.id.splash_screen_app_icon);
         backgroundGrid = (ImageView) root.findViewById(R.id.splash_screen_background_grid);
         scanButton = (ImageButton) root.findViewById(R.id.splash_screen_scan_button);
+        buzzerButton = (ImageButton) root.findViewById(R.id.splash_screen_buzzer_button);
+        aboutButton = (ImageButton) root.findViewById(R.id.splash_screen_about_button);
 
         return root;
     }
@@ -88,61 +116,41 @@ public class AlgoryhmsMainFragment extends Fragment
     @Override
     public void onStart() {
         super.onStart();
-        initAnimations();
+        initAnims();
     }
 
-    private void initAnimations() {
+    public void initAnims() {
         //if anim was already initialized - do not replay it
         if (isAnimInit) {
             return;
         }
 
-        Animation splashAnim = AnimationUtils.loadAnimation(getActivity(), R.anim.bounce);
+        //set animation background
         Animation zoominAnim = AnimationUtils.loadAnimation(getActivity(), R.anim.zoom_in);
-        splashIcon.setAnimation(splashAnim);
         backgroundGrid.setAnimation(zoominAnim);
-        splashAnim.setAnimationListener(this);
-        splashAnim.start();
         zoominAnim.start();
-    }
 
-    @Override
-    public void onAnimationStart(Animation animation) {
+        //set splash icon animation
+        ObjectAnimator splashIconSpring = AnimationHandler.generateAnimation(splashIcon, "rotationY", 270f, 360f, 2200, 1000, new BounceInterpolator());
 
-    }
+        //set an offset for the buttons animations
+        float yOffset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(300);
 
-    @Override
-    public void onAnimationEnd(Animation animation) {
-        ObjectAnimator logoUp = ObjectAnimator.ofFloat(splashIcon, "translationY", 0, -((AlgoryhmsMainActivity)getActivity()).convertDpToPixel(120));
-        ObjectAnimator fadeIn = ObjectAnimator.ofFloat(scanButton, "alpha", 0, 1);
-        logoUp.setDuration(1000);
-        logoUp.setInterpolator(new AnticipateOvershootInterpolator());
-        fadeIn.setDuration(300);
-        fadeIn.setInterpolator(new DecelerateInterpolator());
-        final AnimatorSet as = new AnimatorSet();
-        as.play(fadeIn).after(logoUp);
+        //set buttons animations
+        ObjectAnimator scanButtonUp = AnimationHandler.generateYAnimation(scanButton, yOffset, 0, 1400, 0, new AnticipateOvershootInterpolator());
+        ObjectAnimator scanButtonFadeIn = AnimationHandler.generateAlphaAnimation(scanButton, 0, 1, 10, 0, null);
 
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            private Fragment frag;
+        ObjectAnimator buzzerButtonUp = AnimationHandler.generateYAnimation(buzzerButton, yOffset, 0, 1400, 120, new AnticipateOvershootInterpolator());
+        ObjectAnimator buzzerButtonFadeIn = AnimationHandler.generateAlphaAnimation(buzzerButton, 0, 1, 10, 120, null);
 
-            @Override
-            public void run() {
-                as.start();
-                setIsAnimInit(true);
-                scanButton.setOnClickListener((AlgoryhmsMainFragment) frag);
-            }
+        ObjectAnimator aboutButtonUp = AnimationHandler.generateYAnimation(aboutButton, yOffset, 0, 1400, 240, new AnticipateOvershootInterpolator());
+        ObjectAnimator aboutButtonFadeIn = AnimationHandler.generateAlphaAnimation(aboutButton, 0, 1, 10, 240, null);
+        aboutButtonUp.addListener(this);
 
-            public Runnable init(Fragment frag) {
-                this.frag = frag;
-                return this;
-            }
-        }.init(this), 500);
-    }
-
-    @Override
-    public void onAnimationRepeat(Animation animation) {
-
+        AnimatorSet as = new AnimatorSet();
+        as.play(scanButtonUp).with(scanButtonFadeIn).with(buzzerButtonFadeIn).with(buzzerButtonUp)
+                .with(aboutButtonFadeIn).with(aboutButtonUp).after(splashIconSpring);
+        as.start();
     }
 
     @Override
@@ -153,6 +161,14 @@ public class AlgoryhmsMainFragment extends Fragment
                     scannerActivity.initiateScan();
                 }
 
+                break;
+
+            case R.id.splash_screen_buzzer_button:
+                Toast.makeText(getActivity(), "coming soon", Toast.LENGTH_LONG).show();
+                break;
+
+            case R.id.splash_screen_about_button:
+                Toast.makeText(getActivity(), "coming soon", Toast.LENGTH_LONG).show();
                 break;
 
             default:

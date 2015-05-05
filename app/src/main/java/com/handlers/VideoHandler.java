@@ -16,7 +16,6 @@ import android.widget.VideoView;
 public class VideoHandler {
     private Activity ctx;
     private VideoView video;
-    private View videoHider;
     private MediaController mediaControls;
     private int position;
 
@@ -29,10 +28,6 @@ public class VideoHandler {
 
     public void setVideoView(VideoView video) {
         this.video = video;
-    }
-
-    public void setVideoHiderView(View videoHider) {
-        this.videoHider = videoHider;
     }
 
     public int getVideoPosition() {
@@ -84,35 +79,6 @@ public class VideoHandler {
                     //if we come from a resumed activity, video playback will be paused
                     //(in case position is not 0)
                     video.pause();
-                }
-
-                if (videoHider != null) {
-                    ObjectAnimator fadeOut = ObjectAnimator.ofFloat(videoHider, "alpha", 1, 0);
-                    fadeOut.setDuration(4000);
-                    fadeOut.setInterpolator(new AccelerateDecelerateInterpolator());
-                    fadeOut.addListener(new Animator.AnimatorListener() {
-                        @Override
-                        public void onAnimationStart(Animator animation) {
-
-                        }
-
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            videoHider.setVisibility(View.GONE);
-                        }
-
-                        @Override
-                        public void onAnimationCancel(Animator animation) {
-
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animator animation) {
-
-                        }
-                    });
-
-                    fadeOut.start();
                 }
             }
         });

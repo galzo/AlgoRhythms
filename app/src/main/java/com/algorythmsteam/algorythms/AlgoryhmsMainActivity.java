@@ -74,19 +74,20 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
         super.onActivityResult(requestCode, resultCode, data);
         IntentResult scanningResult = IntentIntegrator
                 .parseActivityResult(requestCode, resultCode, data);
+//
+//        if (scanningResult == null || scanningResult.getContents() == null) {
+//            Toast.makeText(getApplicationContext(),
+//                    "No scan data received!", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
 
-        if (scanningResult != null) {
-            FragmentManager fm = getSupportFragmentManager();
-            GameDescriptionFragment gdf =
-                    GameDescriptionFragment.newInstance(scanningResult.getContents());
-            FragmentTransaction ft = fm.beginTransaction();
-            ft.replace(R.id.main_activity_fragment_container, gdf, GameDescriptionFragment.TAG);
-            ft.commit();
-
-        } else {
-            Toast.makeText(getApplicationContext(),
-                    "No scan data received!", Toast.LENGTH_SHORT).show();
-        }
+        FragmentManager fm = getSupportFragmentManager();
+        String scanContents = scanningResult.getContents(); //TODO: use this in fragment
+        GameDescriptionFragment gdf =
+                GameDescriptionFragment.newInstance("bubble_sort");
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.replace(R.id.main_activity_fragment_container, gdf, GameDescriptionFragment.TAG);
+        ft.commit();
     }
 
     public float convertDpToPixel(float dp){

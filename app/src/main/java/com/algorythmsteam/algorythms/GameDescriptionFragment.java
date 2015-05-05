@@ -3,7 +3,10 @@ package com.algorythmsteam.algorythms;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
+import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -16,19 +19,23 @@ import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ImageView;
 import android.widget.VideoView;
 
+import com.handlers.AnimationHandler;
 import com.handlers.ResourceResolver;
 import com.handlers.VideoHandler;
 
 
-public class GameDescriptionFragment extends Fragment {
+public class GameDescriptionFragment extends Fragment implements Animator.AnimatorListener {
     // the fragment initialization parameters
     public static final String TAG = "GameDescriptionFragment";
     private static final String GAME_ID = "game_id";
     private String gameId;
-    private View root;
-    private TextView gameTitle, gameCategory;
+    private boolean isAnimInit;
+    private View root, videoHider;
+    private ImageView gameTitle, background;
+    private TextView gameCategory;
     private VideoHandler videoHandler;
 
     public static GameDescriptionFragment newInstance(String gameId) {
@@ -60,13 +67,18 @@ public class GameDescriptionFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        isAnimInit = false;
         root = inflater.inflate(R.layout.fragment_game_description, container, false);
-        gameTitle = (TextView) root.findViewById(R.id.game_description_title);
+        gameTitle = (ImageView) root.findViewById(R.id.game_description_title);
+        gameTitle.setImageResource(ResourceResolver.resolveGameNameImage(gameId));
         gameCategory = (TextView) root.findViewById(R.id.game_description_category);
-        gameTitle.setText(ResourceResolver.resolveGameName("bubble_sort"));
-        gameCategory.setText(ResourceResolver.resolveGameCategory("bubble_sort"));
+        videoHider = root.findViewById(R.id.video_hider);
+        background = (ImageView) root.findViewById(R.id.game_description_background_grid);
+        gameCategory.setText(ResourceResolver.resolveGameCategory(gameId));
+        String fontPath = "fonts/coopbl.TTF";
+        Typeface tf = Typeface.createFromAsset(getActivity().getAssets(), fontPath);
+        gameCategory.setTypeface(tf);
         videoHandler.setVideoView((VideoView) root.findViewById(R.id.game_description_video));
-        videoHandler.setVideoHiderView(root.findViewById(R.id.video_hider));
 
         return root;
     }
@@ -74,147 +86,45 @@ public class GameDescriptionFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        titleInTransition();
+        initAnims();
     }
 
-    private void titleInTransition() {
-        ObjectAnimator textUp = ObjectAnimator.ofFloat(gameTitle, "translationY",
-                ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(400), 0);
-        textUp.setDuration(1100);
-        textUp.setInterpolator(new AccelerateDecelerateInterpolator());
-        textUp.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                gameTitle.setVisibility(View.VISIBLE);
-            }
+    private void initAnims() {
+        if (isAnimInit) {
+            //make sure that video hider is gone
+            videoHider.setVisibility(View.GONE);
 
-            @Override
-            public void onAnimationEnd(Animator animation) {
+            //play the video
+            videoHandler.playVideo(gameId);
+            return;
+        }
 
-            }
+        float yOffset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(400);
+        float topYOffset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(190);
+        ObjectAnimator titleUp = AnimationHandler.generateYAnimation(gameTitle, yOffset, 0, 2300, 400, new AnticipateOvershootInterpolator());
+        ObjectAnimator titleFadeIn = AnimationHandler.generateAlphaAnimation(gameTitle, 0, 1, 10, 0, null);
 
-            @Override
-            public void onAnimationCancel(Animator animation) {
+        ObjectAnimator categorySlideIn = AnimationHandler.generateAnimation(gameCategory, "translationX", -yOffset, 0, 1500, 0, new DecelerateInterpolator());
+        ObjectAnimator categoryFadeIn = AnimationHandler.generateAlphaAnimation(gameCategory, 0, 1, 10, 0, null);
 
-            }
+        ObjectAnimator titleUpper = AnimationHandler.generateYAnimation(gameTitle, 0, -topYOffset, 1000, 1200, new AccelerateDecelerateInterpolator());
+        ObjectAnimator categorySlideOut = AnimationHandler.generateAnimation(gameCategory, "translationX", 0, -yOffset, 1200, 0, new DecelerateInterpolator());
 
-            @Override
-            public void onAnimationRepeat(Animator animation) {
+        ObjectAnimator videoFadeIn = AnimationHandler.generateAlphaAnimation(videoHider, 1, 0, 1000, 400, null);
+        videoFadeIn.addListener(this);
 
-            }
-        });
+        ObjectAnimator backgroundFadeIn = AnimationHandler.generateAlphaAnimation(background, 0, 0.7f, 3000, 300, new DecelerateInterpolator());
+        ObjectAnimator backgroundResizeX = AnimationHandler.generateAnimation(background, "scaleX", 1, 2f, 100000, 0, new DecelerateInterpolator());
+        ObjectAnimator backgroundResizeY = AnimationHandler.generateAnimation(background, "scaleY", 1, 2f, 100000, 0, new DecelerateInterpolator());
 
-        ObjectAnimator textSide = ObjectAnimator.ofFloat(gameCategory, "translationX",
-                -((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(400) ,0);
-        textSide.setDuration(1200);
-        textSide.setInterpolator(new AccelerateDecelerateInterpolator());
-        textSide.setStartDelay(380);
-        textSide.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                gameCategory.setVisibility(View.VISIBLE);
-            }
+        AnimatorSet as = new AnimatorSet();
+        as.play(titleUp).with(titleFadeIn);
+        as.play(categorySlideIn).with(categoryFadeIn).after(titleUp);
+        as.play(titleUpper).with(categorySlideOut).after(categorySlideIn);
+        as.play(videoFadeIn).with(backgroundFadeIn).with(backgroundResizeX).with(backgroundResizeY).after(titleUpper);
 
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                titleOutTransition();
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-
-        final AnimatorSet as = new AnimatorSet();
-        as.play(textUp).with(textSide);
-
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                as.start();
-            }
-        }, 500);
+        as.start();
     }
-
-    private void titleOutTransition() {
-        ObjectAnimator textUp = ObjectAnimator.ofFloat(gameTitle, "translationY", 0,
-                -((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(230));
-        textUp.setDuration(800);
-        textUp.setInterpolator(new AccelerateDecelerateInterpolator());
-        textUp.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                videoHandler.playVideo("bubble_sort");
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-
-        ObjectAnimator textResizeX = ObjectAnimator.ofFloat(gameTitle, "scaleX", 0.7f);
-        textResizeX.setDuration(800);
-        textResizeX.setInterpolator(new AccelerateDecelerateInterpolator());
-
-        ObjectAnimator textResizeY = ObjectAnimator.ofFloat(gameTitle, "scaleY", 0.7f);
-        textResizeY.setDuration(800);
-        textResizeY.setInterpolator(new AccelerateDecelerateInterpolator());
-
-        ObjectAnimator textSide = ObjectAnimator.ofFloat(gameCategory, "translationX", 0,  -((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(300));
-        textSide.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                gameCategory.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-        textSide.setDuration(800);
-        textSide.setInterpolator(new AccelerateDecelerateInterpolator());
-
-        final AnimatorSet as = new AnimatorSet();
-        as.play(textUp).with(textResizeX).with(textResizeY).with(textSide);
-
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                as.start();
-            }
-        }, 2200);
-    }
-
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -237,5 +147,26 @@ public class GameDescriptionFragment extends Fragment {
 
     private boolean doesGameDescriptionContainVideo() {
         return (ResourceResolver.resolveVideoResource(gameId) != ResourceResolver.UNDEFINED_RESOURCE);
+    }
+
+    @Override
+    public void onAnimationStart(Animator animation) {
+        isAnimInit = true;
+        videoHandler.playVideo(gameId);
+    }
+
+    @Override
+    public void onAnimationEnd(Animator animation) {
+        videoHider.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onAnimationCancel(Animator animation) {
+
+    }
+
+    @Override
+    public void onAnimationRepeat(Animator animation) {
+
     }
 }

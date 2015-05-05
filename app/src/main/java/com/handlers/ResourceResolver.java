@@ -21,12 +21,16 @@ public class ResourceResolver {
         return UNDEFINED_RESOURCE;
     }
 
-    public static String resolveGameName(String gameId) {
-        if (gameId == null || !gameId.contains("_")) {
-            return null;
+    public static int resolveGameNameImage(String gameId) {
+        if (gameId == null) {
+            return UNDEFINED_RESOURCE;
         }
 
-        return capitalizeString(gameId.replace("_", " "));
+        if (gameId.equals(BUBBLE_SORT)) {
+            return R.drawable.bubble_sort_title;
+        }
+
+        return UNDEFINED_RESOURCE;
     }
 
     public static String resolveGameCategory(String gameID) {
