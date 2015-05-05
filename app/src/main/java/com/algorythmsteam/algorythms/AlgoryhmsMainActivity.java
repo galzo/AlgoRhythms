@@ -78,17 +78,17 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
         super.onActivityResult(requestCode, resultCode, data);
         IntentResult scanningResult = IntentIntegrator
                 .parseActivityResult(requestCode, resultCode, data);
-//
-//        if (scanningResult == null || scanningResult.getContents() == null) {
-//            Toast.makeText(getApplicationContext(),
-//                    "No scan data received!", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
+
+        if (scanningResult == null || scanningResult.getContents() == null) {
+            Toast.makeText(getApplicationContext(),
+                    "No scan data received!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         FragmentManager fm = getSupportFragmentManager();
-        String scanContents = scanningResult.getContents(); //TODO: use this in fragment
+        String scanContents = scanningResult.getContents();
         GameDescriptionFragment gdf =
-                GameDescriptionFragment.newInstance("bubble_sort");
+                GameDescriptionFragment.newInstance(scanContents);
         _currFrag = gdf;
         FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.main_activity_fragment_container, gdf, GameDescriptionFragment.TAG);

@@ -233,7 +233,7 @@ public class GameDescriptionFragment extends Fragment implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.game_description_button:
-                Toast.makeText(getActivity(), "description", Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Coming soon", Toast.LENGTH_LONG).show();
                 break;
 
             default:
