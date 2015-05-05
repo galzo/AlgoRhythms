@@ -89,6 +89,15 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
                 .parseActivityResult(requestCode, resultCode, data);
 
         if (scanningResult == null || scanningResult.getContents() == null) {
+            if (_currFrag instanceof AlgoryhmsMainFragment) {
+                ((AlgoryhmsMainFragment) _currFrag).setIsAnimInit(false);
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .detach(_currFrag)
+                        .attach(_currFrag)
+                        .commit();
+            }
+            
             Toast.makeText(getApplicationContext(),
                     "No scan data received!", Toast.LENGTH_SHORT).show();
             return;
@@ -117,6 +126,7 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             AlgoryhmsMainFragment amf = new AlgoryhmsMainFragment();
+            _currFrag = amf;
             fragmentTransaction.setCustomAnimations(R.anim.enter_reverse, R.anim.exit_reverse);
             fragmentTransaction.replace(R.id.main_activity_fragment_container, amf, AlgoryhmsMainFragment.TAG);
             fragmentTransaction.commit();

@@ -76,9 +76,8 @@ public class BuzzerFragment extends Fragment implements View.OnClickListener, An
         float yOffset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(400);
         float topYOffset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(190);
 
-        ObjectAnimator titleUp = AnimationHandler.generateYAnimation(buzzerTitle, yOffset, -topYOffset, 1400, 600, new AccelerateDecelerateInterpolator());
+        ObjectAnimator titleUp = AnimationHandler.generateYAnimation(buzzerTitle, -yOffset, -topYOffset, 700, 600, new OvershootInterpolator());
         ObjectAnimator titleFadeIn = AnimationHandler.generateAlphaAnimation(buzzerTitle, 0, 1, 10, 0, null);
-//        ObjectAnimator titleUpper = AnimationHandler.generateYAnimation(buzzerTitle, 0, -topYOffset, 1000, 1200, new AnticipateOvershootInterpolator());
 
         ObjectAnimator backgroundFadeIn = AnimationHandler.generateAlphaAnimation(background, 0, 0.7f, 3000, 300, new DecelerateInterpolator());
         ObjectAnimator backgroundResizeX = AnimationHandler.generateAnimation(background, "scaleX", 1, 2f, 100000, 0, new DecelerateInterpolator());
