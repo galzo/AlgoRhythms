@@ -16,11 +16,9 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import java.util.List;
-
 
 public class AlgoryhmsMainActivity extends ActionBarActivity
-        implements AlgoryhmsMainFragment.QRCodeScanHandler{
+        implements AlgoryhmsMainFragment.MainActivityCallback {
     public static final String TAG = "AlgoryhmsMainActivity";
     public static final String ACTION_SCAN = "com.google.zxing.client.android.SCAN";
     private Fragment _currFrag;
@@ -72,6 +70,17 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
         }, 200);
     }
 
+    @Override
+    public void openBuzzer() {
+        BuzzerFragment bf = BuzzerFragment.newInstance();
+        _currFrag = bf;
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.setCustomAnimations(R.anim.enter, R.anim.exit);
+        ft.replace(R.id.main_activity_fragment_container, bf, BuzzerFragment.TAG);
+        ft.commit();
+    }
+
     //as for now - onActivityResult is used only to retrieve scanning results
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -104,11 +113,11 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
 
     @Override
     public void onBackPressed() {
-        if (_currFrag.isVisible() && (_currFrag instanceof GameDescriptionFragment)) {
+        if (_currFrag.isVisible() && !(_currFrag instanceof AlgoryhmsMainFragment)) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             AlgoryhmsMainFragment amf = new AlgoryhmsMainFragment();
-            fragmentTransaction.setCustomAnimations(R.anim.enter, R.anim.exit);
+            fragmentTransaction.setCustomAnimations(R.anim.enter_reverse, R.anim.exit_reverse);
             fragmentTransaction.replace(R.id.main_activity_fragment_container, amf, AlgoryhmsMainFragment.TAG);
             fragmentTransaction.commit();
             return;

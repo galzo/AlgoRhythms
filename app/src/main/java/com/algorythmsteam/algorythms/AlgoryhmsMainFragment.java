@@ -3,42 +3,25 @@ package com.algorythmsteam.algorythms;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.TimeInterpolator;
-import android.content.res.Resources;
-import android.graphics.Interpolator;
-import android.media.MediaPlayer;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
+
 import com.handlers.AnimationHandler;
 
-import android.os.Bundle;
 import android.app.Activity;
-import android.content.Intent;
-import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.BounceInterpolator;
-import android.view.animation.CycleInterpolator;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.OvershootInterpolator;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ImageView;
-
-import java.util.ArrayList;
 
 
 /**
@@ -55,6 +38,7 @@ public class AlgoryhmsMainFragment extends Fragment
 
     @Override
     public void onAnimationEnd(Animator animation) {
+        //used after all animations have been displayed
         scanButton.setOnClickListener(AlgoryhmsMainFragment.this);
         buzzerButton.setOnClickListener(AlgoryhmsMainFragment.this);
         aboutButton.setOnClickListener(AlgoryhmsMainFragment.this);
@@ -71,13 +55,14 @@ public class AlgoryhmsMainFragment extends Fragment
 
     }
 
-    public interface QRCodeScanHandler {
+    public interface MainActivityCallback {
+        void openBuzzer();
         void initiateScan();
     }
 
     private View root;
     private boolean isAnimInit;
-    private QRCodeScanHandler scannerActivity;
+    private MainActivityCallback activityCallback;
     private ImageView splashIcon, backgroundGrid;
     private ImageButton scanButton, buzzerButton, aboutButton;
 
@@ -94,7 +79,7 @@ public class AlgoryhmsMainFragment extends Fragment
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            scannerActivity = (QRCodeScanHandler) getActivity();
+            activityCallback = (MainActivityCallback) getActivity();
         } catch(ClassCastException e) {
             Log.e(TAG, "activity does not support QRCodeScanHandler interface");
         }
@@ -153,26 +138,78 @@ public class AlgoryhmsMainFragment extends Fragment
         as.start();
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
+    private void handleButtonClickTransition(int clickedButtonId) {
+        switch (clickedButtonId) {
             case R.id.splash_screen_scan_button:
-                if (scannerActivity != null) {
-                    scannerActivity.initiateScan();
+                if (activityCallback != null) {
+                    activityCallback.initiateScan();
                 }
 
                 break;
 
             case R.id.splash_screen_buzzer_button:
-                Toast.makeText(getActivity(), "coming soon", Toast.LENGTH_LONG).show();
+                if (activityCallback != null) {
+                    activityCallback.openBuzzer();
+                }
                 break;
 
             case R.id.splash_screen_about_button:
+                //TODO: not going to get here, add about button functionality to fix
                 Toast.makeText(getActivity(), "coming soon", Toast.LENGTH_LONG).show();
                 break;
 
             default:
                 break;
+        }
+    }
+
+    private void handleTransitionAnim(final int clickedButtonId) {
+        float yOffset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(600);
+        ObjectAnimator splashIconUp = AnimationHandler.generateYAnimation(splashIcon, 0, -yOffset, 1400, 0, new AccelerateDecelerateInterpolator());
+        ObjectAnimator aboutButtonAnim = AnimationHandler.generateYAnimation(aboutButton, 0, yOffset, 1400, 0, new AccelerateDecelerateInterpolator());
+        aboutButtonAnim.addListener(new Animator.AnimatorListener() {
+
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                handleButtonClickTransition(clickedButtonId);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+        ObjectAnimator nonClickedButtonAnim;
+        if (clickedButtonId == R.id.splash_screen_scan_button) {
+            nonClickedButtonAnim = AnimationHandler.generateYAnimation(buzzerButton, 0, yOffset, 1400, 0, new AccelerateDecelerateInterpolator());
+        } else {
+            nonClickedButtonAnim = AnimationHandler.generateYAnimation(scanButton, 0, -yOffset, 1400, 0, new AccelerateDecelerateInterpolator());
+        }
+
+        AnimatorSet as = new AnimatorSet();
+        as.play(splashIconUp).with(aboutButtonAnim).with(nonClickedButtonAnim);
+        as.start();
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.splash_screen_about_button) {
+            Toast.makeText(getActivity(), "coming soon", Toast.LENGTH_LONG).show();
+        } else {
+            handleTransitionAnim(v.getId());
         }
     }
 }
