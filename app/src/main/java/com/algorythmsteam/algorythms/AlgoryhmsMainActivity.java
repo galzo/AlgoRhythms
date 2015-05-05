@@ -16,11 +16,14 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import java.util.List;
+
 
 public class AlgoryhmsMainActivity extends ActionBarActivity
         implements AlgoryhmsMainFragment.QRCodeScanHandler{
     public static final String TAG = "AlgoryhmsMainActivity";
     public static final String ACTION_SCAN = "com.google.zxing.client.android.SCAN";
+    private Fragment _currFrag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +32,7 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         AlgoryhmsMainFragment frag = new AlgoryhmsMainFragment();
+        _currFrag = frag;
         fragmentTransaction.add(R.id.main_activity_fragment_container, frag, AlgoryhmsMainFragment.TAG);
         fragmentTransaction.commit();
     }
@@ -85,6 +89,7 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
         String scanContents = scanningResult.getContents(); //TODO: use this in fragment
         GameDescriptionFragment gdf =
                 GameDescriptionFragment.newInstance("bubble_sort");
+        _currFrag = gdf;
         FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.main_activity_fragment_container, gdf, GameDescriptionFragment.TAG);
         ft.commit();
@@ -95,5 +100,20 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
         DisplayMetrics metrics = resources.getDisplayMetrics();
         float px = dp * (metrics.densityDpi / 160f);
         return px;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (_currFrag.isVisible() && (_currFrag instanceof GameDescriptionFragment)) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            AlgoryhmsMainFragment amf = new AlgoryhmsMainFragment();
+            fragmentTransaction.setCustomAnimations(R.anim.enter, R.anim.exit);
+            fragmentTransaction.replace(R.id.main_activity_fragment_container, amf, AlgoryhmsMainFragment.TAG);
+            fragmentTransaction.commit();
+            return;
+        }
+
+        super.onBackPressed();
     }
 }

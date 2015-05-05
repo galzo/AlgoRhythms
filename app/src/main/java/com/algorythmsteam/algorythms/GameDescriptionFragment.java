@@ -14,9 +14,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnticipateOvershootInterpolator;
+import android.view.animation.BounceInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ImageView;
@@ -27,7 +31,8 @@ import com.handlers.ResourceResolver;
 import com.handlers.VideoHandler;
 
 
-public class GameDescriptionFragment extends Fragment implements Animator.AnimatorListener {
+public class GameDescriptionFragment extends Fragment implements
+        Animator.AnimatorListener, View.OnClickListener {
     // the fragment initialization parameters
     public static final String TAG = "GameDescriptionFragment";
     private static final String GAME_ID = "game_id";
@@ -35,7 +40,10 @@ public class GameDescriptionFragment extends Fragment implements Animator.Animat
     private boolean isAnimInit;
     private View root, videoHider;
     private ImageView gameTitle, background;
-    private TextView gameCategory;
+    private RelativeLayout noVideoHolder;
+    private VideoView video;
+    private ImageButton instructionsButton;
+    private TextView gameCategory, noVideoText;
     private VideoHandler videoHandler;
 
     public static GameDescriptionFragment newInstance(String gameId) {
@@ -58,8 +66,10 @@ public class GameDescriptionFragment extends Fragment implements Animator.Animat
             gameId = getArguments().getString(GAME_ID);
         }
 
-        if (videoHandler == null) {
+        if (doesGameDescriptionContainVideo(gameId)) {
             videoHandler = new VideoHandler(getActivity());
+        } else {
+            videoHandler = null;
         }
     }
 
@@ -70,15 +80,23 @@ public class GameDescriptionFragment extends Fragment implements Animator.Animat
         isAnimInit = false;
         root = inflater.inflate(R.layout.fragment_game_description, container, false);
         gameTitle = (ImageView) root.findViewById(R.id.game_description_title);
-        gameTitle.setImageResource(ResourceResolver.resolveGameNameImage(gameId));
         gameCategory = (TextView) root.findViewById(R.id.game_description_category);
-        videoHider = root.findViewById(R.id.video_hider);
         background = (ImageView) root.findViewById(R.id.game_description_background_grid);
+        instructionsButton = (ImageButton) root.findViewById(R.id.game_description_button);
+        noVideoHolder = (RelativeLayout) root.findViewById(R.id.game_description_no_video);
+        noVideoText = (TextView) root.findViewById(R.id.game_description_no_video_text);
+        video = (VideoView) root.findViewById(R.id.game_description_video);
+        videoHider = root.findViewById(R.id.video_hider);
+
+        gameTitle.setImageResource(ResourceResolver.resolveGameNameImage(gameId));
         gameCategory.setText(ResourceResolver.resolveGameCategory(gameId));
-        String fontPath = "fonts/coopbl.TTF";
-        Typeface tf = Typeface.createFromAsset(getActivity().getAssets(), fontPath);
+        Typeface tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/coopbl.TTF");
         gameCategory.setTypeface(tf);
-        videoHandler.setVideoView((VideoView) root.findViewById(R.id.game_description_video));
+        noVideoText.setTypeface(tf);
+
+        if (videoHandler != null) {
+            videoHandler.setVideoView(video);
+        }
 
         return root;
     }
@@ -94,8 +112,14 @@ public class GameDescriptionFragment extends Fragment implements Animator.Animat
             //make sure that video hider is gone
             videoHider.setVisibility(View.GONE);
 
-            //play the video
-            videoHandler.playVideo(gameId);
+            if (videoHandler != null) {
+                //play the video
+                videoHandler.playVideo(gameId);
+            } else {
+                video.setVisibility(View.GONE);
+                noVideoHolder.setVisibility(View.VISIBLE);
+            }
+
             return;
         }
 
@@ -107,8 +131,8 @@ public class GameDescriptionFragment extends Fragment implements Animator.Animat
         ObjectAnimator categorySlideIn = AnimationHandler.generateAnimation(gameCategory, "translationX", -yOffset, 0, 1500, 0, new DecelerateInterpolator());
         ObjectAnimator categoryFadeIn = AnimationHandler.generateAlphaAnimation(gameCategory, 0, 1, 10, 0, null);
 
-        ObjectAnimator titleUpper = AnimationHandler.generateYAnimation(gameTitle, 0, -topYOffset, 1000, 1200, new AccelerateDecelerateInterpolator());
-        ObjectAnimator categorySlideOut = AnimationHandler.generateAnimation(gameCategory, "translationX", 0, -yOffset, 1200, 0, new DecelerateInterpolator());
+        ObjectAnimator titleUpper = AnimationHandler.generateYAnimation(gameTitle, 0, -topYOffset, 1000, 1200, new AnticipateOvershootInterpolator());
+        ObjectAnimator categorySlideOut = AnimationHandler.generateAnimation(gameCategory, "translationX", 0, -yOffset, 900, 0, new AccelerateInterpolator());
 
         ObjectAnimator videoFadeIn = AnimationHandler.generateAlphaAnimation(videoHider, 1, 0, 1000, 400, null);
         videoFadeIn.addListener(this);
@@ -117,11 +141,36 @@ public class GameDescriptionFragment extends Fragment implements Animator.Animat
         ObjectAnimator backgroundResizeX = AnimationHandler.generateAnimation(background, "scaleX", 1, 2f, 100000, 0, new DecelerateInterpolator());
         ObjectAnimator backgroundResizeY = AnimationHandler.generateAnimation(background, "scaleY", 1, 2f, 100000, 0, new DecelerateInterpolator());
 
+        final ObjectAnimator titleFlip = AnimationHandler.generateAnimation(gameTitle, "rotationY", 0, 360f, 2200, 6000, new AnticipateOvershootInterpolator());
+        titleFlip.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                titleFlip.setStartDelay(8000);
+                titleFlip.start();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
         AnimatorSet as = new AnimatorSet();
         as.play(titleUp).with(titleFadeIn);
         as.play(categorySlideIn).with(categoryFadeIn).after(titleUp);
         as.play(titleUpper).with(categorySlideOut).after(categorySlideIn);
         as.play(videoFadeIn).with(backgroundFadeIn).with(backgroundResizeX).with(backgroundResizeY).after(titleUpper);
+        as.play(titleFlip).after(videoFadeIn);
 
         as.start();
     }
@@ -140,23 +189,33 @@ public class GameDescriptionFragment extends Fragment implements Animator.Animat
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         //we use onSaveInstanceState in order to store the video playback position for orientation change
-        videoHandler.pauseVideo();
-        int position = videoHandler.getVideoPosition();
-        savedInstanceState.putInt("Position", position);
+        if (videoHandler != null) {
+            videoHandler.pauseVideo();
+            int position = videoHandler.getVideoPosition();
+            savedInstanceState.putInt("Position", position);
+        }
     }
 
-    private boolean doesGameDescriptionContainVideo() {
+    private boolean doesGameDescriptionContainVideo(String gameId) {
         return (ResourceResolver.resolveVideoResource(gameId) != ResourceResolver.UNDEFINED_RESOURCE);
     }
 
     @Override
     public void onAnimationStart(Animator animation) {
+        //used upon starting the "videoFadeIn" animation
         isAnimInit = true;
-        videoHandler.playVideo(gameId);
+        if (videoHandler != null) {
+            videoHandler.playVideo(gameId);
+        } else {
+            video.setVisibility(View.GONE);
+            noVideoHolder.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
     public void onAnimationEnd(Animator animation) {
+        //used upon finishing the "videoFadeIn" animation
+        instructionsButton.setOnClickListener(this);
         videoHider.setVisibility(View.GONE);
     }
 
@@ -168,5 +227,17 @@ public class GameDescriptionFragment extends Fragment implements Animator.Animat
     @Override
     public void onAnimationRepeat(Animator animation) {
 
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.game_description_button:
+                Toast.makeText(getActivity(), "description", Toast.LENGTH_LONG).show();
+                break;
+
+            default:
+                break;
+        }
     }
 }

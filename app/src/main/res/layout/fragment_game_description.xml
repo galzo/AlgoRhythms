@@ -14,12 +14,64 @@
         android:layout_height="400dp"
         android:src="@drawable/game_desc_background"/>
 
-    <VideoView
-        android:id="@+id/game_description_video"
-        android:layout_width="match_parent"
+    <RelativeLayout
+        android:id="@+id/game_description_video_container"
+        android:layout_centerInParent="true"
+        android:background="@color/no_vid_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <VideoView
+            android:id="@+id/game_description_video"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
+
+        <RelativeLayout
+            android:visibility="gone"
+            android:layout_centerInParent="true"
+            android:id="@+id/game_description_no_video"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/game_description_no_video_icon"
+                android:layout_centerInParent="true"
+                android:src="@drawable/no_video_description_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="300dp"
+                android:paddingBottom="50dp"
+                android:paddingTop="50dp"/>
+
+            <TextView
+                android:id="@+id/game_description_no_video_text"
+                android:layout_below="@+id/game_description_no_video_icon"
+                android:text="no video description :("
+                android:paddingBottom="10dp"
+                android:textColor="@android:color/tertiary_text_dark"
+                android:textSize="23sp"
+                android:layout_centerHorizontal="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+
+
+    </RelativeLayout>
+
+
+    <ImageButton
+        android:id="@+id/game_description_button"
+        android:layout_below="@id/game_description_video_container"
+        android:layout_centerHorizontal="true"
+        android:background="@android:color/transparent"
+        android:layout_width="150dp"
+        android:layout_marginTop="20dp"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
-    
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:src="@drawable/instructions_button"/>
+
     <RelativeLayout
         android:id="@+id/video_hider"
         android:layout_alignParentBottom="true"
@@ -44,7 +96,6 @@
         android:text="gameCategory"
         android:layout_centerHorizontal="true"
         android:layout_below="@id/game_description_title"
-        android:textColor="@android:color/holo_red_dark"/>
-
-
+        android:layout_marginTop="10dp"
+        android:textColor="@color/algorythms_red"/>
 </RelativeLayout>
