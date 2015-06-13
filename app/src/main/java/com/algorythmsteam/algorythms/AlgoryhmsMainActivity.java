@@ -97,7 +97,7 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
                         .attach(_currFrag)
                         .commit();
             }
-            
+
             Toast.makeText(getApplicationContext(),
                     "No scan data received!", Toast.LENGTH_SHORT).show();
             return;
