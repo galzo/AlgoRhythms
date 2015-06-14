@@ -1,7 +1,6 @@
 package com.algorythmsteam.algorythms;
 
 import android.content.res.Resources;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.support.v4.app.FragmentManager;
@@ -18,7 +17,8 @@ import com.google.zxing.integration.android.IntentResult;
 
 
 public class AlgoryhmsMainActivity extends ActionBarActivity
-        implements AlgoryhmsMainFragment.MainActivityCallback {
+        implements AlgoryhmsMainFragment.FragmentsLauncherCallback,
+        QRScanFragment.QRScanCallback{
     public static final String TAG = "AlgoryhmsMainActivity";
     public static final String ACTION_SCAN = "com.google.zxing.client.android.SCAN";
     private Fragment _currFrag;
@@ -58,29 +58,6 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void initiateScan() {
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                IntentIntegrator scanIntegrator = new IntentIntegrator(AlgoryhmsMainActivity.this);
-                scanIntegrator.initiateScan();
-            }
-        }, 200);
-    }
-
-    @Override
-    public void openBuzzer() {
-        BuzzerFragment bf = BuzzerFragment.newInstance();
-        _currFrag = bf;
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.setCustomAnimations(R.anim.enter, R.anim.exit);
-        ft.replace(R.id.main_activity_fragment_container, bf, BuzzerFragment.TAG);
-        ft.commit();
-    }
-
     //as for now - onActivityResult is used only to retrieve scanning results
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -89,15 +66,12 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
                 .parseActivityResult(requestCode, resultCode, data);
 
         if (scanningResult == null || scanningResult.getContents() == null) {
-            if (_currFrag instanceof AlgoryhmsMainFragment) {
-                ((AlgoryhmsMainFragment) _currFrag).setIsAnimInit(false);
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .detach(_currFrag)
-                        .attach(_currFrag)
-                        .commit();
-            }
-
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main_activity_fragment_container,
+                    new AlgoryhmsMainFragment(), AlgoryhmsMainFragment.TAG)
+                    .commit();
+            
             Toast.makeText(getApplicationContext(),
                     "No scan data received!", Toast.LENGTH_SHORT).show();
             return;
@@ -113,7 +87,7 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
         ft.commit();
     }
 
-    public float convertDpToPixel(float dp){
+    public float convertDpToPixel(float dp) {
         Resources resources = getApplicationContext().getResources();
         DisplayMetrics metrics = resources.getDisplayMetrics();
         float px = dp * (metrics.densityDpi / 160f);
@@ -134,5 +108,37 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
         }
 
         super.onBackPressed();
+    }
+
+    @Override
+    public void launchScanFragment(String type) {
+        Fragment launchFrag = null;
+        String fragTag = null;
+
+        if (type.equals(AlgoryhmsMainFragment.NFC_SCAN_FRAGMENT)) {
+            launchFrag = new NFCScanFragment();
+            _currFrag = launchFrag;
+            fragTag = NFCScanFragment.TAG;
+        }
+
+        if (type.equals(AlgoryhmsMainFragment.QR_SCAN_FRAGMENT)) {
+            launchFrag = new QRScanFragment();
+            _currFrag = launchFrag;
+            fragTag = QRScanFragment.TAG;
+        }
+
+        if (launchFrag != null) {
+            _currFrag = launchFrag;
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            ft.replace(R.id.main_activity_fragment_container, launchFrag, fragTag);
+            ft.commit();
+        }
+    }
+
+    @Override
+    public void launchQRScanner() {
+        IntentIntegrator scanIntegrator = new IntentIntegrator(AlgoryhmsMainActivity.this);
+        scanIntegrator.initiateScan();
     }
 }

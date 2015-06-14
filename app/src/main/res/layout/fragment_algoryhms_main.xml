@@ -68,7 +68,7 @@
     <TextView
         android:alpha="0"
         android:id="@+id/splash_screen_nfc_description"
-        android:text="Scan Game Cards (NFC)"
+        android:text="@string/main_screen_nfc_description"
         android:textSize="15dp"
         android:textColor="@color/algorythms_red"
         android:layout_width="90dp"
@@ -81,7 +81,7 @@
     <TextView
         android:alpha="0"
         android:id="@+id/splash_screen_qr_description"
-        android:text="Scan QR-Codes (Camera)"
+        android:text="@string/main_screen_qr_description"
         android:textSize="15dp"
         android:textColor="@color/algorythms_blue"
         android:layout_width="90dp"

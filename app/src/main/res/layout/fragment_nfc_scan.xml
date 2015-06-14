@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <RelativeLayout
+        android:id="@+id/anchor_layout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_centerInParent="true"/>
+
+    <ImageButton
+        android:id="@+id/nfc_scan_screen_title"
+        android:alpha="0"
+        android:layout_width="250dp"
+        android:layout_height="110dp"
+        android:paddingLeft="20dp"
+        android:layout_marginBottom="30dp"
+        android:scaleType="fitCenter"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/anchor_layout"
+        android:background="@android:color/transparent"
+        android:src="@drawable/nfc_scan_title"/>
+
+    <TextView
+        android:id="@+id/nfc_scan_screen_description"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/anchor_layout"
+        android:alpha="0"
+        android:layout_width="200dp"
+        android:textSize="20dp"
+        android:gravity="center_horizontal"
+        android:layout_height="wrap_content"
+        android:textColor="@color/algorythms_red"
+        android:text="@string/nfc_screen_description_text"/>
+</RelativeLayout>

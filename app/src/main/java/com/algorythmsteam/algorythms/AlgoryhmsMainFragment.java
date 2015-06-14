@@ -18,7 +18,6 @@ import com.handlers.AnimationHandler;
 
 import android.app.Activity;
 import android.view.View.OnClickListener;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.AnticipateInterpolator;
@@ -28,7 +27,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
@@ -40,6 +38,12 @@ import java.util.ArrayList;
 public class AlgoryhmsMainFragment extends Fragment
         implements OnClickListener, Animator.AnimatorListener {
     public static final String TAG = "AlgoryhmsMainFragment";
+    public static final String NFC_SCAN_FRAGMENT = "nfc_scan_frag";
+    public static final String QR_SCAN_FRAGMENT = "qr_scan_frag";
+
+    public interface FragmentsLauncherCallback {
+        void launchScanFragment(String type);
+    }
 
     @Override
     public void onAnimationStart(Animator animation) {
@@ -65,14 +69,9 @@ public class AlgoryhmsMainFragment extends Fragment
 
     }
 
-    public interface MainActivityCallback {
-        void openBuzzer();
-        void initiateScan();
-    }
-
     private View root;
     private boolean isAnimInit;
-    private MainActivityCallback activityCallback;
+    private FragmentsLauncherCallback activityCallback;
     private ImageView splashIcon, backgroundGrid;
     private ImageButton nfcButton, qrButton, aboutButton;
     private TextView nfcDescription, qrDescription;
@@ -90,7 +89,7 @@ public class AlgoryhmsMainFragment extends Fragment
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            activityCallback = (MainActivityCallback) getActivity();
+            activityCallback = (FragmentsLauncherCallback) getActivity();
         } catch(ClassCastException e) {
             Log.e(TAG, "activity does not support QRCodeScanHandler interface");
         }
@@ -154,80 +153,19 @@ public class AlgoryhmsMainFragment extends Fragment
         as.start();
     }
 
-//    private void handleButtonClickTransition(int clickedButtonId) {
-//        switch (clickedButtonId) {
-//            case R.id.splash_screen_nfc_scan_button:
-//                if (activityCallback != null) {
-//                    activityCallback.initiateScan();
-//                }
-//
-//                break;
-//
-//            case R.id.splash_screen_qr_scan_button:
-//                if (activityCallback != null) {
-//                    activityCallback.openBuzzer();
-//                }
-//                break;
-//
-//            case R.id.splash_screen_about_button:
-//                //TODO: not going to get here, add about button functionality to fix
-//                Toast.makeText(getActivity(), "coming soon", Toast.LENGTH_LONG).show();
-//                break;
-//
-//            default:
-//                break;
-//        }
-//    }
-
-
-//    private void handleTransitionAnim(final int clickedButtonId) {
-//        float yOffset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(600);
-//        ObjectAnimator splashIconUp = AnimationHandler.generateYAnimation(splashIcon, 0, -yOffset, 1400, 0, new AccelerateDecelerateInterpolator());
-//        ObjectAnimator aboutButtonAnim = AnimationHandler.generateYAnimation(aboutButton, 0, yOffset, 1400, 0, new AccelerateDecelerateInterpolator());
-//        aboutButtonAnim.addListener(new Animator.AnimatorListener() {
-//
-//
-//            @Override
-//            public void onAnimationStart(Animator animation) {
-//
-//            }
-//
-//            @Override
-//            public void onAnimationEnd(Animator animation) {
-//                handleButtonClickTransition(clickedButtonId);
-//            }
-//
-//            @Override
-//            public void onAnimationCancel(Animator animation) {
-//
-//            }
-//
-//            @Override
-//            public void onAnimationRepeat(Animator animation) {
-//
-//            }
-//        });
-//
-//        ObjectAnimator nonClickedButtonAnim;
-//        if (clickedButtonId == R.id.splash_screen_nfc_scan_button) {
-//            nonClickedButtonAnim = AnimationHandler.generateYAnimation(qrButton, 0, yOffset, 1400, 0, new AccelerateDecelerateInterpolator());
-//        } else {
-//            nonClickedButtonAnim = AnimationHandler.generateYAnimation(nfcButton, 0, -yOffset, 1400, 0, new AccelerateDecelerateInterpolator());
-//        }
-//
-//        AnimatorSet as = new AnimatorSet();
-//        as.play(splashIconUp).with(aboutButtonAnim).with(nonClickedButtonAnim);
-//        as.start();
-//    }
-
     @Override
     public void onClick(View v) {
-        handleButtonClickAnimations(v.getId());
+        handleButtonClickTransition(v.getId());
     }
 
-    private void handleButtonClickAnimations(final int clickedButtonID) {
+    private void handleButtonClickTransition(final int clickedButtonID) {
         ArrayList<Animator> animators = new ArrayList<>();
+
+        //if we clicked the about button
         if (clickedButtonID == R.id.splash_screen_about_button) {
+            //if we just clicked the about button and it was already clicked less then a second ago
+            //then ignore this click. the alpha setting is used to indicate whether it was or was not
+            //clicked in the range of 1 second, according to description text that is shown on screen
             if (qrDescription.getAlpha() != 0) return;
 
             animators.add(AnimationHandler.generatePopInAnimation(qrDescription, 0, 1, 500, 0, new OvershootInterpolator()));
@@ -246,6 +184,7 @@ public class AlgoryhmsMainFragment extends Fragment
             }, 1500);
         }
 
+        //if we clicked one of the scan buttons (NFC or QR)
         else {
             animators.add(AnimationHandler.generatePopOutAnimation(splashIcon, 1, 0, 500, 0, new AnticipateInterpolator()));
             animators.add(AnimationHandler.generateAlphaAnimation(backgroundGrid, 0.3f, 0, 1200, 0, null));
@@ -262,6 +201,37 @@ public class AlgoryhmsMainFragment extends Fragment
             View clickedButton = root.findViewById(clickedButtonID);
             float yOffset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(300);
             ObjectAnimator clickedButtonYTransition = AnimationHandler.generateYAnimation(clickedButton, 0, yOffset, 700, 1200, new AnticipateInterpolator());
+            clickedButtonYTransition.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (activityCallback != null) {
+                                String fragType = (clickedButtonID == R.id.splash_screen_nfc_scan_button) ?
+                                        NFC_SCAN_FRAGMENT : QR_SCAN_FRAGMENT;
+                                activityCallback.launchScanFragment(fragType);
+                            }
+                        }
+                    }, 500);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            });
             animators.add(clickedButtonYTransition);
         }
 
@@ -283,6 +253,5 @@ public class AlgoryhmsMainFragment extends Fragment
         int xOffset = Math.abs(viewLocation[0] - screenWidthMid);
         return Math.abs(xOffset - viewWidthMid);
     }
-
-
 }
+

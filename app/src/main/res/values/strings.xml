@@ -7,4 +7,9 @@
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="game_desc">gameDescription</string>
+    <string name="nfc_screen_description_text">Snap your phone to the game card you wish to play</string>
+    <string name="main_screen_nfc_description">Scan Game Cards (NFC)</string>
+    <string name="main_screen_qr_description">Scan QR-Codes (Camera)</string>
+    <string name="qr_screen_hint_text">QR-Codes look like this:</string>
+    <string name="qr_screen_description">Aim your camera at the QR-Code of the game you wish to play!</string>
 </resources>
