@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -71,7 +72,7 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
                     .replace(R.id.main_activity_fragment_container,
                     new AlgoryhmsMainFragment(), AlgoryhmsMainFragment.TAG)
                     .commit();
-            
+
             Toast.makeText(getApplicationContext(),
                     "No scan data received!", Toast.LENGTH_SHORT).show();
             return;
@@ -133,6 +134,10 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
             FragmentTransaction ft = fm.beginTransaction();
             ft.replace(R.id.main_activity_fragment_container, launchFrag, fragTag);
             ft.commit();
+        }
+
+        else {
+            Log.e(TAG, "launchScanFragment: no fragment type was specified");
         }
     }
 
