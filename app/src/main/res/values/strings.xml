@@ -12,4 +12,5 @@
     <string name="main_screen_qr_description">Scan QR-Codes (Camera)</string>
     <string name="qr_screen_hint_text">QR-Codes look like this:</string>
     <string name="qr_screen_description">Aim your camera at the QR-Code of the game you wish to play!</string>
+    <string name="game_intro_subtitle_default_txt">Sorting Algorithm</string>
 </resources>

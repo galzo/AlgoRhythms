@@ -19,7 +19,7 @@ import com.google.zxing.integration.android.IntentResult;
 
 public class AlgoryhmsMainActivity extends ActionBarActivity
         implements AlgoryhmsMainFragment.FragmentsLauncherCallback,
-        QRScanFragment.QRScanCallback{
+        QRScanFragment.QRScanCallback {
     public static final String TAG = "AlgoryhmsMainActivity";
     public static final String ACTION_SCAN = "com.google.zxing.client.android.SCAN";
     private Fragment _currFrag;
