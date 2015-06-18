@@ -91,6 +91,12 @@ public class ResourceResolver {
         return null;
     }
 
+    public static boolean isValidGameId(String gameId) {
+        int gameResource = ResourceResolver.resolveGameNameImage(gameId);
+        return (gameResource != ResourceResolver.UNDEFINED_RESOURCE);
+    }
+
+
     public static String capitalizeString(String string) {
         char[] chars = string.toLowerCase().toCharArray();
         boolean found = false;

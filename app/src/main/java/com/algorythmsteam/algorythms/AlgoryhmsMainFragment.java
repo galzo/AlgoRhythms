@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.handlers.AnimationHandler;
+import com.handlers.ResourceResolver;
 
 import android.app.Activity;
 import android.view.View.OnClickListener;
@@ -28,6 +29,7 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -35,15 +37,9 @@ import java.util.ArrayList;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class AlgoryhmsMainFragment extends Fragment
+public class AlgoryhmsMainFragment extends AlgorhythmsFragment
         implements OnClickListener, Animator.AnimatorListener {
     public static final String TAG = "AlgoryhmsMainFragment";
-    public static final String NFC_SCAN_FRAGMENT = "nfc_scan_frag";
-    public static final String QR_SCAN_FRAGMENT = "qr_scan_frag";
-
-    public interface FragmentsLauncherCallback {
-        void launchScanFragment(String type);
-    }
 
     @Override
     public void onAnimationStart(Animator animation) {
@@ -71,7 +67,7 @@ public class AlgoryhmsMainFragment extends Fragment
 
     private View root;
     private boolean isAnimInit;
-    private FragmentsLauncherCallback activityCallback;
+    private AlgoryhmsMainActivity activity;
     private ImageView splashIcon, backgroundGrid;
     private ImageButton nfcButton, qrButton, aboutButton;
     private TextView nfcDescription, qrDescription;
@@ -79,20 +75,6 @@ public class AlgoryhmsMainFragment extends Fragment
     public AlgoryhmsMainFragment() {
         super();
         this.isAnimInit = false;
-    }
-
-    public void setIsAnimInit(boolean initAnim) {
-        this.isAnimInit = initAnim;
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            activityCallback = (FragmentsLauncherCallback) getActivity();
-        } catch(ClassCastException e) {
-            Log.e(TAG, "activity does not support QRCodeScanHandler interface");
-        }
     }
 
     @Override
@@ -114,6 +96,16 @@ public class AlgoryhmsMainFragment extends Fragment
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        try {
+            activity = (AlgoryhmsMainActivity) getActivity();
+        } catch(ClassCastException e) {
+            Log.e(TAG, "activity should be of type AlgorhythmsMainActivity");
+        }
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         initSplashAnims();
@@ -125,10 +117,14 @@ public class AlgoryhmsMainFragment extends Fragment
             return;
         }
 
-        //set animation background
-        Animation zoominAnim = AnimationUtils.loadAnimation(getActivity(), R.anim.zoom_in);
-        backgroundGrid.setAnimation(zoominAnim);
-        zoominAnim.start();
+        //set background animation
+        ObjectAnimator backgroundFadeIn = AnimationHandler.generateAlphaAnimation(backgroundGrid, 0, 0.3f, 3000, 0, new DecelerateInterpolator());
+        ObjectAnimator backgroundResizeX = AnimationHandler.generateAnimation(backgroundGrid, "scaleX", 1, 2f, 100000, 0, new DecelerateInterpolator());
+        ObjectAnimator backgroundResizeY = AnimationHandler.generateAnimation(backgroundGrid, "scaleY", 1, 2f, 100000, 0, new DecelerateInterpolator());
+        AnimatorSet backgroundAnim = new AnimatorSet();
+        backgroundAnim.playTogether(backgroundFadeIn, backgroundResizeX, backgroundResizeY);
+        backgroundAnim.setStartDelay(300);
+        backgroundAnim.start();
 
         //set splash icon animation
         ObjectAnimator splashIconSpring = AnimationHandler.generateAnimation(splashIcon, "rotationY", 270f, 360f, 2200, 1000, new BounceInterpolator());
@@ -213,10 +209,20 @@ public class AlgoryhmsMainFragment extends Fragment
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            if (activityCallback != null) {
-                                String fragType = (clickedButtonID == R.id.splash_screen_nfc_scan_button) ?
-                                        NFC_SCAN_FRAGMENT : QR_SCAN_FRAGMENT;
-                                activityCallback.launchScanFragment(fragType);
+                            String fragTag;
+                            AlgorhythmsFragment frag;
+
+                            if (clickedButtonID == R.id.splash_screen_nfc_scan_button) {
+                                frag = new NFCScanFragment();
+                                fragTag = NFCScanFragment.TAG;
+                            } else {
+                                frag = new QRScanFragment();
+                                fragTag = QRScanFragment.TAG;
+                            }
+
+
+                            if (activity != null) {
+                                activity.launchFragment(frag, fragTag, null, null);
                             }
                         }
                     }, 500);
@@ -252,6 +258,18 @@ public class AlgoryhmsMainFragment extends Fragment
         int viewWidthMid = (v.getWidth() / 2);
         int xOffset = Math.abs(viewLocation[0] - screenWidthMid);
         return Math.abs(xOffset - viewWidthMid);
+    }
+
+    @Override
+    public boolean handleBackPress() {
+        return false;
+    }
+
+    @Override
+    public boolean handleNfcScan(String res) {
+        //we return false since the functionality should be the same as in the mainActivity
+        //(since this is the main screen) thus we can let the activity handle the scan result
+        return false;
     }
 }
 

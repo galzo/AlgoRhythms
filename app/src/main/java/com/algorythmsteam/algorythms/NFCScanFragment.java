@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,12 +16,13 @@ import android.widget.ImageView;
 
 import com.handlers.AnimationHandler;
 
-public class NFCScanFragment extends Fragment {
+public class NFCScanFragment extends AlgorhythmsFragment {
     public static final String TAG = "NFCScanFragment";
 
     private View root;
     private TextView nfcDescription;
     private ImageView nfcTitle;
+    private AlgoryhmsMainActivity activity;
 
     public NFCScanFragment() {
         // Required empty public constructor
@@ -29,6 +31,11 @@ public class NFCScanFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try {
+            activity = (AlgoryhmsMainActivity) getActivity();
+        } catch (ClassCastException e) {
+            Log.e(TAG, "activity should be of type AlgoryhmsMainActivity");
+        }
     }
 
     @Override
@@ -60,21 +67,20 @@ public class NFCScanFragment extends Fragment {
         as.start();
     }
 
-    //TODO: handle onAttach and onDetach later on
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-//        try {
-//            mListener = (OnFragmentInteractionListener) activity;
-//        } catch (ClassCastException e) {
-//            throw new ClassCastException(activity.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
+    public boolean handleBackPress() {
+        if (activity != null) {
+            AlgoryhmsMainFragment frag = new AlgoryhmsMainFragment();
+            activity.launchFragment(frag, AlgoryhmsMainFragment.TAG, R.anim.enter_reverse, R.anim.exit_reverse);
+            return true;
+        }
+
+        return false;
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-//        mListener = null;
+    public boolean handleNfcScan(String res) {
+        //TODO: implement this
+        return true;
     }
 }

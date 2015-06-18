@@ -7,6 +7,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,7 @@ import android.widget.TextView;
 import com.handlers.AnimationHandler;
 
 
-public class QRScanFragment extends Fragment {
+public class QRScanFragment extends AlgorhythmsFragment {
     public interface QRScanCallback {
         void launchQRScanner();
     }
@@ -26,6 +27,7 @@ public class QRScanFragment extends Fragment {
     private TextView qrDescription, qrHintText;
     private ImageView qrTitle, qrHintImage;
     private View root;
+    private AlgoryhmsMainActivity activity;
     private QRScanCallback scanCallback;
 
     public QRScanFragment() {
@@ -35,6 +37,12 @@ public class QRScanFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try {
+            activity = (AlgoryhmsMainActivity) getActivity();
+        } catch (ClassCastException e) {
+            Log.e(TAG, "Activity should be of type AlgoryhmsMainActivity");
+        }
+
     }
 
     @Override
@@ -97,5 +105,22 @@ public class QRScanFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         scanCallback = null;
+    }
+
+    @Override
+    public boolean handleBackPress() {
+        if (activity != null) {
+            AlgoryhmsMainFragment frag = new AlgoryhmsMainFragment();
+            activity.launchFragment(frag, AlgoryhmsMainFragment.TAG, R.anim.enter_reverse, R.anim.exit_reverse);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean handleNfcScan(String res) {
+        //QRScanFragment should ignore nfc scans
+        return true;
     }
 }

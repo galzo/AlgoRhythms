@@ -1,6 +1,9 @@
 package com.algorythmsteam.algorythms;
 
 import android.content.res.Resources;
+import android.nfc.NfcAdapter;
+import android.nfc.Tag;
+import android.nfc.tech.Ndef;
 import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.support.v4.app.FragmentManager;
@@ -15,27 +18,86 @@ import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.handlers.NdefReader;
+import com.handlers.ResourceResolver;
+
+import java.util.ArrayList;
 
 
-public class AlgoryhmsMainActivity extends ActionBarActivity
-        implements AlgoryhmsMainFragment.FragmentsLauncherCallback,
-        QRScanFragment.QRScanCallback {
+public class AlgoryhmsMainActivity extends ActionBarActivity implements QRScanFragment.QRScanCallback {
     public static final String TAG = "AlgoryhmsMainActivity";
     public static final String ACTION_SCAN = "com.google.zxing.client.android.SCAN";
-    private Fragment _currFrag;
+    public static final String MIME_TEXT_PLAIN = "text/plain";
+    private AlgorhythmsFragment _currFrag;
+    private NfcAdapter nfcAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_algoryhms_main);
+
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        if (nfcAdapter == null) {
+            Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
+        }
+
+        else if (!nfcAdapter.isEnabled()) {
+            Toast.makeText(this, "nfc is disabled!", Toast.LENGTH_LONG).show();
+        } else if(handleIntent(getIntent())) {
+            return;
+        }
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         AlgoryhmsMainFragment frag = new AlgoryhmsMainFragment();
+//        GameIntroFragment frag = GameIntroFragment.newInstance(ResourceResolver.BUBBLE_SORT);
         _currFrag = frag;
         fragmentTransaction.add(R.id.main_activity_fragment_container, frag, AlgoryhmsMainFragment.TAG);
         fragmentTransaction.commit();
     }
 
+    private boolean handleIntent(Intent intent) {
+        String action = intent.getAction();
+        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+            String type = intent.getType();
+            if (MIME_TEXT_PLAIN.equals(type)) {
+                Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+                NdefReader reader = new NdefReader(this);
+                reader.execute(tag);
+                return true;
+            }
+
+            else {
+                Log.d(TAG, "Wrong mime type: " + type);
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    public void handleNfcResult(String result) {
+        //if the nfc scan came after application was opened, let the current fragment handle it
+        if (_currFrag != null) {
+            if (_currFrag.handleNfcScan(result)) {
+                return;
+            }
+        }
+
+        //otherwise - let the activity handle the scan result
+
+        //if the scan result is non-relevant or defected, simply launch the mainScreen
+        if (result == null || result.trim().length() == 0 || !ResourceResolver.isValidGameId(result.trim())) {
+            launchFragment(new AlgoryhmsMainFragment(), AlgoryhmsMainFragment.TAG, null, null);
+        }
+
+        //otherwise - lets launch the relevant game intro screen
+        else {
+            String gameID = result.trim();
+            launchFragment(GameIntroFragment.newInstance(gameID), GameIntroFragment.TAG, null, null);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -67,77 +129,38 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
                 .parseActivityResult(requestCode, resultCode, data);
 
         if (scanningResult == null || scanningResult.getContents() == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.main_activity_fragment_container,
-                    new AlgoryhmsMainFragment(), AlgoryhmsMainFragment.TAG)
-                    .commit();
-
+            launchFragment(new AlgoryhmsMainFragment(), AlgoryhmsMainFragment.TAG, null, null);
             Toast.makeText(getApplicationContext(),
                     "No scan data received!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        FragmentManager fm = getSupportFragmentManager();
         String scanContents = scanningResult.getContents();
-        GameDescriptionFragment gdf =
-                GameDescriptionFragment.newInstance(scanContents);
-        _currFrag = gdf;
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.replace(R.id.main_activity_fragment_container, gdf, GameDescriptionFragment.TAG);
-        ft.commit();
+        launchFragment(GameIntroFragment.newInstance(scanContents), GameIntroFragment.TAG, null, null);
     }
 
     public float convertDpToPixel(float dp) {
         Resources resources = getApplicationContext().getResources();
         DisplayMetrics metrics = resources.getDisplayMetrics();
-        float px = dp * (metrics.densityDpi / 160f);
-        return px;
+        return dp * (metrics.densityDpi / 160f);
     }
 
-    @Override
-    public void onBackPressed() {
-        if (_currFrag.isVisible() && !(_currFrag instanceof AlgoryhmsMainFragment)) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            AlgoryhmsMainFragment amf = new AlgoryhmsMainFragment();
-            _currFrag = amf;
-            fragmentTransaction.setCustomAnimations(R.anim.enter_reverse, R.anim.exit_reverse);
-            fragmentTransaction.replace(R.id.main_activity_fragment_container, amf, AlgoryhmsMainFragment.TAG);
-            fragmentTransaction.commit();
-            return;
-        }
+    public void launchFragment(AlgorhythmsFragment frag, String tag, Integer enterAnim, Integer exitAnim) {
+        _currFrag = frag;
 
-        super.onBackPressed();
-    }
-
-    @Override
-    public void launchScanFragment(String type) {
-        Fragment launchFrag = null;
-        String fragTag = null;
-
-        if (type.equals(AlgoryhmsMainFragment.NFC_SCAN_FRAGMENT)) {
-            launchFrag = new NFCScanFragment();
-            _currFrag = launchFrag;
-            fragTag = NFCScanFragment.TAG;
-        }
-
-        if (type.equals(AlgoryhmsMainFragment.QR_SCAN_FRAGMENT)) {
-            launchFrag = new QRScanFragment();
-            _currFrag = launchFrag;
-            fragTag = QRScanFragment.TAG;
-        }
-
-        if (launchFrag != null) {
-            _currFrag = launchFrag;
+        if (frag != null) {
             FragmentManager fm = getSupportFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
-            ft.replace(R.id.main_activity_fragment_container, launchFrag, fragTag);
+            if (enterAnim != null && exitAnim != null) {
+                ft.setCustomAnimations(enterAnim, exitAnim);
+            }
+
+            ft.replace(R.id.main_activity_fragment_container, frag, tag);
             ft.commit();
         }
 
         else {
-            Log.e(TAG, "launchScanFragment: no fragment type was specified");
+            Log.e(TAG, "launchFragment: no fragment type was specified");
         }
     }
 
@@ -145,5 +168,16 @@ public class AlgoryhmsMainActivity extends ActionBarActivity
     public void launchQRScanner() {
         IntentIntegrator scanIntegrator = new IntentIntegrator(AlgoryhmsMainActivity.this);
         scanIntegrator.initiateScan();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (_currFrag != null && _currFrag.isVisible()) {
+            if (_currFrag.handleBackPress()) {
+                return;
+            }
+        }
+
+        super.onBackPressed();
     }
 }
