@@ -52,6 +52,7 @@ public class AlgoryhmsMainFragment extends AlgorhythmsFragment
         nfcButton.setOnClickListener(AlgoryhmsMainFragment.this);
         qrButton.setOnClickListener(AlgoryhmsMainFragment.this);
         aboutButton.setOnClickListener(AlgoryhmsMainFragment.this);
+
         isAnimInit = true;
     }
 
@@ -70,7 +71,7 @@ public class AlgoryhmsMainFragment extends AlgorhythmsFragment
     private AlgoryhmsMainActivity activity;
     private ImageView splashIcon, backgroundGrid;
     private ImageButton nfcButton, qrButton, aboutButton;
-    private TextView nfcDescription, qrDescription;
+    private TextView nfcDescription, qrDescription, tipTitle, tipContent;
 
     public AlgoryhmsMainFragment() {
         super();
@@ -88,10 +89,14 @@ public class AlgoryhmsMainFragment extends AlgorhythmsFragment
         aboutButton = (ImageButton) root.findViewById(R.id.splash_screen_about_button);
         nfcDescription = (TextView) root.findViewById(R.id.splash_screen_nfc_description);
         qrDescription = (TextView) root.findViewById(R.id.splash_screen_qr_description);
+        tipTitle = (TextView) root.findViewById(R.id.splash_screen_tip_title);
+        tipContent = (TextView) root.findViewById(R.id.splash_screen_tip_content);
 
         Typeface tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/coopbl.TTF");
         nfcDescription.setTypeface(tf);
         qrDescription.setTypeface(tf);
+        tipTitle.setTypeface(tf);
+        tipContent.setTypeface(tf);
         return root;
     }
 
@@ -146,7 +151,15 @@ public class AlgoryhmsMainFragment extends AlgorhythmsFragment
         AnimatorSet as = new AnimatorSet();
         as.play(qrButtonUp).with(qrButtonFadeIn).with(nfcButtonFadeIn).with(nfcButtonUp)
                 .with(aboutButtonFadeIn).with(aboutButtonUp).after(splashIconSpring);
+
+        AnimatorSet tipAnims = new AnimatorSet();
+        ObjectAnimator tipTitleFadeIn = AnimationHandler.generateAlphaAnimation(tipTitle, 0, 1, 1500, 0, new DecelerateInterpolator());
+        ObjectAnimator tipContentFadeIn = AnimationHandler.generateAlphaAnimation(tipContent, 0, 0.4f, 1500, 400, new DecelerateInterpolator());
+        tipAnims.play(tipTitleFadeIn).with(tipContentFadeIn).after(as);
+
+        tipAnims.start();
         as.start();
+
     }
 
     @Override
@@ -157,27 +170,42 @@ public class AlgoryhmsMainFragment extends AlgorhythmsFragment
     private void handleButtonClickTransition(final int clickedButtonID) {
         ArrayList<Animator> animators = new ArrayList<>();
 
-        //if we clicked the about button
         if (clickedButtonID == R.id.splash_screen_about_button) {
             //if we just clicked the about button and it was already clicked less then a second ago
             //then ignore this click. the alpha setting is used to indicate whether it was or was not
             //clicked in the range of 1 second, according to description text that is shown on screen
-            if (qrDescription.getAlpha() != 0) return;
+            if (qrDescription.getAlpha() != 0 || nfcDescription.getAlpha() != 0) return;
+            ObjectAnimator nfcButtonFlip = AnimationHandler.generateAnimation(nfcButton, "rotationY", 0, 90, 500, 0, new AnticipateInterpolator());
+            ObjectAnimator qrButtonFlip = AnimationHandler.generateAnimation(qrButton, "rotationY", 0, 90, 600, 120, new AnticipateInterpolator());
+            ObjectAnimator nfcTextFlip = AnimationHandler.generateAnimation(nfcDescription, "rotationY", 270, 360, 500, 500, new OvershootInterpolator());
+            ObjectAnimator nfcTextFadeIn = AnimationHandler.generateAlphaAnimation(nfcDescription, 0, 1, 10, 500, null);
+            ObjectAnimator qrTextFlip = AnimationHandler.generateAnimation(qrDescription, "rotationY", 270, 360, 500, 620, new OvershootInterpolator());
+            ObjectAnimator qrTextFadeIn = AnimationHandler.generateAlphaAnimation(qrDescription, 0, 1, 10, 620, null);
+            animators.add(nfcButtonFlip);
+            animators.add(nfcTextFlip);
+            animators.add(nfcTextFadeIn);
+            animators.add(qrButtonFlip);
+            animators.add(qrTextFlip);
+            animators.add(qrTextFadeIn);
 
-            animators.add(AnimationHandler.generatePopInAnimation(qrDescription, 0, 1, 500, 0, new OvershootInterpolator()));
-            animators.add(AnimationHandler.generatePopInAnimation(nfcDescription, 0, 1, 500, 120, new OvershootInterpolator()));
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    ArrayList<Animator> animators = new ArrayList<>();
-                    animators.add(AnimationHandler.generatePopOutAnimation(qrDescription, 1, 0, 500, 0, new AnticipateInterpolator()));
-                    animators.add(AnimationHandler.generatePopOutAnimation(nfcDescription, 1, 0, 500, 120, new AnticipateInterpolator()));
+                    ObjectAnimator nfcTextFlip = AnimationHandler.generateAnimation(nfcDescription, "rotationY", 0, 90, 500, 0, new AnticipateInterpolator());
+                    ObjectAnimator nfcTextFadeOut = AnimationHandler.generateAlphaAnimation(nfcDescription, 1, 0, 1500, 0, null);
+                    ObjectAnimator qrTextFlip = AnimationHandler.generateAnimation(qrDescription, "rotationY", 0, 90, 500, 120, new AnticipateInterpolator());
+                    ObjectAnimator qrTextFadeOut = AnimationHandler.generateAlphaAnimation(qrDescription, 1, 0, 1500, 120, null);
+
+                    ObjectAnimator nfcButtonFlip = AnimationHandler.generateAnimation(nfcButton, "rotationY", 270, 360, 500, 500, new OvershootInterpolator());
+                    ObjectAnimator qrButtonFlip = AnimationHandler.generateAnimation(qrButton, "rotationY", 270, 360, 500, 620, new OvershootInterpolator());
+
                     AnimatorSet as = new AnimatorSet();
-                    as.playTogether(animators);
+                    as.playTogether(nfcTextFlip, nfcTextFadeOut, qrTextFlip, qrTextFadeOut, nfcButtonFlip, qrButtonFlip);
                     as.start();
                 }
             }, 1500);
+
         }
 
         //if we clicked one of the scan buttons (NFC or QR)
@@ -193,6 +221,9 @@ public class AlgoryhmsMainFragment extends AlgorhythmsFragment
                 animators.add(AnimationHandler.generatePopOutAnimation(qrButton, 1, 0, 500, 120, new AnticipateInterpolator()));
                 animators.add(AnimationHandler.generatePopOutAnimation(aboutButton, 1, 0, 500, 240, new AnticipateInterpolator()));
             }
+
+            animators.add(AnimationHandler.generateAlphaAnimation(tipTitle, 1, 0, 500, 360, null));
+            animators.add(AnimationHandler.generateAlphaAnimation(tipContent, 0.4f, 0, 500, 480, null));
 
             View clickedButton = root.findViewById(clickedButtonID);
             float yOffset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(300);
@@ -262,6 +293,8 @@ public class AlgoryhmsMainFragment extends AlgorhythmsFragment
 
     @Override
     public boolean handleBackPress() {
+        //we want to exit the application upon clicking back in main screen
+        //thus we return false to the activity, so that it'll handle the backpress
         return false;
     }
 
