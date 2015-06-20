@@ -52,8 +52,6 @@ public class AlgoryhmsMainFragment extends AlgorhythmsFragment
         nfcButton.setOnClickListener(AlgoryhmsMainFragment.this);
         qrButton.setOnClickListener(AlgoryhmsMainFragment.this);
         aboutButton.setOnClickListener(AlgoryhmsMainFragment.this);
-
-        isAnimInit = true;
     }
 
     @Override
@@ -111,9 +109,10 @@ public class AlgoryhmsMainFragment extends AlgorhythmsFragment
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
         initSplashAnims();
+        isAnimInit = true;
     }
 
     public void initSplashAnims() {
@@ -148,16 +147,16 @@ public class AlgoryhmsMainFragment extends AlgorhythmsFragment
         ObjectAnimator aboutButtonFadeIn = AnimationHandler.generateAlphaAnimation(aboutButton, 0, 1, 10, 240, null);
         aboutButtonUp.addListener(this);
 
+        AnimatorSet tipAnims = new AnimatorSet();
+        tipAnims.setStartDelay(120);
+        ObjectAnimator tipTitleFadeIn = AnimationHandler.generateAlphaAnimation(tipTitle, 0, 1, 1400, 0, new DecelerateInterpolator());
+        ObjectAnimator tipContentFadeIn = AnimationHandler.generateAlphaAnimation(tipContent, 0, 0.4f, 1400, 400, new DecelerateInterpolator());
+        tipAnims.play(tipTitleFadeIn).with(tipContentFadeIn);
+
         AnimatorSet as = new AnimatorSet();
         as.play(qrButtonUp).with(qrButtonFadeIn).with(nfcButtonFadeIn).with(nfcButtonUp)
-                .with(aboutButtonFadeIn).with(aboutButtonUp).after(splashIconSpring);
+                .with(aboutButtonFadeIn).with(aboutButtonUp).with(tipAnims).after(splashIconSpring);
 
-        AnimatorSet tipAnims = new AnimatorSet();
-        ObjectAnimator tipTitleFadeIn = AnimationHandler.generateAlphaAnimation(tipTitle, 0, 1, 1500, 0, new DecelerateInterpolator());
-        ObjectAnimator tipContentFadeIn = AnimationHandler.generateAlphaAnimation(tipContent, 0, 0.4f, 1500, 400, new DecelerateInterpolator());
-        tipAnims.play(tipTitleFadeIn).with(tipContentFadeIn).after(as);
-
-        tipAnims.start();
         as.start();
 
     }
@@ -171,10 +170,7 @@ public class AlgoryhmsMainFragment extends AlgorhythmsFragment
         ArrayList<Animator> animators = new ArrayList<>();
 
         if (clickedButtonID == R.id.splash_screen_about_button) {
-            //if we just clicked the about button and it was already clicked less then a second ago
-            //then ignore this click. the alpha setting is used to indicate whether it was or was not
-            //clicked in the range of 1 second, according to description text that is shown on screen
-            if (qrDescription.getAlpha() != 0 || nfcDescription.getAlpha() != 0) return;
+            aboutButton.setOnClickListener(null); //to avoid bugs related to multiple quick clicks on that button
             ObjectAnimator nfcButtonFlip = AnimationHandler.generateAnimation(nfcButton, "rotationY", 0, 90, 500, 0, new AnticipateInterpolator());
             ObjectAnimator qrButtonFlip = AnimationHandler.generateAnimation(qrButton, "rotationY", 0, 90, 600, 120, new AnticipateInterpolator());
             ObjectAnimator nfcTextFlip = AnimationHandler.generateAnimation(nfcDescription, "rotationY", 270, 360, 500, 500, new OvershootInterpolator());
@@ -198,7 +194,29 @@ public class AlgoryhmsMainFragment extends AlgorhythmsFragment
                     ObjectAnimator qrTextFadeOut = AnimationHandler.generateAlphaAnimation(qrDescription, 1, 0, 1500, 120, null);
 
                     ObjectAnimator nfcButtonFlip = AnimationHandler.generateAnimation(nfcButton, "rotationY", 270, 360, 500, 500, new OvershootInterpolator());
-                    ObjectAnimator qrButtonFlip = AnimationHandler.generateAnimation(qrButton, "rotationY", 270, 360, 500, 620, new OvershootInterpolator());
+                    final ObjectAnimator qrButtonFlip = AnimationHandler.generateAnimation(qrButton, "rotationY", 270, 360, 500, 620, new OvershootInterpolator());
+                    qrButtonFlip.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            aboutButton.setOnClickListener(AlgoryhmsMainFragment.this);
+                            qrButtonFlip.removeAllListeners();
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
+                        }
+                    });
 
                     AnimatorSet as = new AnimatorSet();
                     as.playTogether(nfcTextFlip, nfcTextFadeOut, qrTextFlip, qrTextFadeOut, nfcButtonFlip, qrButtonFlip);
