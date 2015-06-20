@@ -299,10 +299,25 @@ public class AlgoryhmsMainFragment extends AlgorhythmsFragment
     }
 
     @Override
-    public boolean handleNfcScan(String res) {
-        //we return false since the functionality should be the same as in the mainActivity
-        //(since this is the main screen) thus we can let the activity handle the scan result
-        return false;
+    public boolean handleNfcScan(String result) {
+        if (activity == null) {
+            return true;
+        }
+
+        //the scan result is defected or non-relevant, in such case - simply ignore it
+        if (result == null || result.length() == 0 ||
+                !ResourceResolver.isValidGameId(result)) {
+            return true;
+        }
+
+        //otherwise - lets launch the relevant game intro screen
+        else{
+            activity.launchFragment(GameIntroFragment.newInstance(result),
+                    GameIntroFragment.TAG, null, null);
+        }
+
+
+        return true;
     }
 }
 

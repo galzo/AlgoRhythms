@@ -81,24 +81,33 @@ public class AlgoryhmsMainActivity extends ActionBarActivity implements QRScanFr
     }
 
     public void handleNfcResult(String result) {
-        //if the nfc scan came after application was opened, let the current fragment handle it
+        String res = null;
+
+        //lets first validate that the read result is of the format of Algorythms NFC text
+        //(I.E - Algorhythms#X where X is the value of the card) - if its not, then do not handle it
+        if (result != null && result.trim().length() != 0) {
+            String[] splitRes = result.split("#");
+            if (splitRes.length >= 2 && splitRes[0].equals("algorhythms")) {
+                res = splitRes[1].trim();
+            }
+        }
+
+        //if the nfc scan came after application was opened, let the current active fragment handle it
         if (_currFrag != null) {
-            if (_currFrag.handleNfcScan(result)) {
+            if (_currFrag.handleNfcScan(res)) {
                 return;
             }
         }
 
         //otherwise - let the activity handle the scan result
-
         //if the scan result is non-relevant or defected, simply launch the mainScreen
-        if (result == null || result.trim().length() == 0 || !ResourceResolver.isValidGameId(result.trim())) {
+        if (res == null || res.length() == 0 || !ResourceResolver.isValidGameId(res)) {
             launchFragment(new AlgoryhmsMainFragment(), AlgoryhmsMainFragment.TAG, null, null);
         }
 
         //otherwise - lets launch the relevant game intro screen
         else {
-            String gameID = result.trim();
-            launchFragment(GameIntroFragment.newInstance(gameID), GameIntroFragment.TAG, null, null);
+            launchFragment(GameIntroFragment.newInstance(res), GameIntroFragment.TAG, null, null);
         }
     }
 

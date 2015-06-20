@@ -13,8 +13,10 @@ import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
 import android.widget.TextView;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.handlers.AnimationHandler;
+import com.handlers.ResourceResolver;
 
 public class NFCScanFragment extends AlgorhythmsFragment {
     public static final String TAG = "NFCScanFragment";
@@ -79,8 +81,24 @@ public class NFCScanFragment extends AlgorhythmsFragment {
     }
 
     @Override
-    public boolean handleNfcScan(String res) {
-        //TODO: implement this
+    public boolean handleNfcScan(String result) {
+        if (activity == null) {
+            return true;
+        }
+
+        //the scan result is defected or non-relevant, in such case - simply ignore it
+        if (result == null || result.length() == 0 ||
+                !ResourceResolver.isValidGameId(result)) {
+            Toast.makeText(getActivity(), "Please scan a game-type card", Toast.LENGTH_LONG).show();
+            return true;
+        }
+
+        //otherwise - lets launch the relevant game intro screen
+        else{
+            activity.launchFragment(GameIntroFragment.newInstance(result),
+                    GameIntroFragment.TAG, null, null);
+        }
+
         return true;
     }
 }
