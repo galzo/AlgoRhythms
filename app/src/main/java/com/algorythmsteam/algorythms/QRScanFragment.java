@@ -82,7 +82,7 @@ public class QRScanFragment extends AlgorhythmsFragment {
         if (isAnimInit) {
             return;
         }
-        
+
         float yOffset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(-300);
         ObjectAnimator titleDragDown = AnimationHandler.generateYAnimation(qrTitle, yOffset, 0, 750, 40, new OvershootInterpolator());
         ObjectAnimator titleFadeIn = AnimationHandler.generateAlphaAnimation(qrTitle, 0, 1, 30, 0, null);

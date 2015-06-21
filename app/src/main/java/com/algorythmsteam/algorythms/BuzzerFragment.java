@@ -26,7 +26,7 @@ import com.handlers.AnimationHandler;
 import java.io.IOException;
 
 
-public class BuzzerFragment extends Fragment implements View.OnClickListener, Animator.AnimatorListener {
+public class BuzzerFragment extends AlgorhythmsFragment implements View.OnClickListener, Animator.AnimatorListener {
     public static String TAG = "buzzerFragment";
     private boolean isAnimInit;
     private View root;
@@ -153,5 +153,15 @@ public class BuzzerFragment extends Fragment implements View.OnClickListener, An
     @Override
     public void onAnimationRepeat(Animator animation) {
 
+    }
+
+    @Override
+    public boolean handleBackPress() {
+        return false;
+    }
+
+    @Override
+    public boolean handleNfcScan(String res) {
+        return false;
     }
 }

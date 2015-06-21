@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <ImageView
+        android:id="@+id/dialog_bubble_sort_scan_nfc_icon"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="30dp"
+        android:background="@android:color/transparent"
+        android:scaleType="fitCenter"
+        android:src="@drawable/nfc_scan_icon"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:id="@+id/dialog_bubble_sort_title"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:layout_below="@+id/dialog_bubble_sort_scan_nfc_icon"
+        android:text="Please Scan The Left Opened Card"
+        android:textSize="25dp"
+        android:textColor="@color/algorythms_red"/>
+
+    <LinearLayout
+        android:id="@+id/dialog_bubble_sort_cards_holder"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="35dp"
+        android:layout_below="@id/dialog_bubble_sort_title">
+
+        <ImageView
+            android:id="@+id/dialog_bubble_sort_left_card_icon"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:scaleType="fitCenter"
+            android:layout_marginRight="25dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/number_10"/>
+
+        <ImageView
+            android:id="@+id/dialog_bubble_sort_right_card_icon"
+            android:visibility="gone"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:scaleType="fitCenter"
+            android:layout_marginLeft="25dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/number_6"/>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/dialog_bubble_sort_move_indicator_icon"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="40dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/dialog_bubble_sort_cards_holder"
+        android:scaleType="fitCenter"
+        android:background="@android:color/transparent"
+        android:src="@drawable/like_button"/>
+
+</RelativeLayout>

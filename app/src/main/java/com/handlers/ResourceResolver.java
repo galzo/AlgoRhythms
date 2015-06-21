@@ -1,10 +1,13 @@
 package com.handlers;
 
+import android.graphics.Color;
+
 import com.algorythmsteam.algorythms.R;
 
 public class ResourceResolver {
     public static final String BUBBLE_SORT = "bubble_sort";
     public static final String BUCKET_SORT = "bucket_sort";
+    public static final String TREASURE_GAME = "treasure_game";
     public static final String QUICK_SORT = "quick_sort";
     public static final String COUNTING_SORT = "counting_sort";
     public static final String BINARY_SEARCH = "binary_search";
@@ -14,6 +17,7 @@ public class ResourceResolver {
     public static final String CATEGORY_SORTING_ALG = "Sorting Algorithm";
     public static final String CATEGORY_GRAPH_ALG = "Graph Algorithm";
     public static final String CATEGORY_SEARCH_ALG = "Search Algorithm";
+    public static final String CATEGORY_RANDOM_ALG = "Random Based Algorithm";
 
     public static final int UNDEFINED_RESOURCE = -1;
 
@@ -50,6 +54,10 @@ public class ResourceResolver {
             return R.drawable.quick_sort_title;
         }
 
+        if (gameId.equals(TREASURE_GAME)) {
+            return R.drawable.treasure_game_title;
+        }
+
         if (gameId.equals(COUNTING_SORT)) {
             return R.drawable.counting_sort_title;
         }
@@ -70,6 +78,26 @@ public class ResourceResolver {
         return UNDEFINED_RESOURCE;
     }
 
+    public static int resolveGameTypeColor(String gameId) {
+        if (gameId == null) {
+            return UNDEFINED_RESOURCE;
+        }
+
+        if (gameId.equals(BUBBLE_SORT)) {
+            return R.color.algorythms_red;
+        }
+
+        if (gameId.equals(QUICK_SORT)) {
+            return R.color.algorythms_blue;
+        }
+
+        if (gameId.equals(TREASURE_GAME)) {
+            return R.color.algorythms_red; //TODO: get color resource for this
+        }
+
+        return UNDEFINED_RESOURCE;
+    }
+
     public static String resolveGameCategory(String gameID) {
         if (gameID == null) {
             return null;
@@ -78,6 +106,10 @@ public class ResourceResolver {
         if (gameID.equals(BUBBLE_SORT) || gameID.equals(BUCKET_SORT) || gameID.equals(QUICK_SORT)
                 || gameID.equals(COUNTING_SORT)) {
             return CATEGORY_SORTING_ALG;
+        }
+
+        if (gameID.equals(TREASURE_GAME)) {
+            return CATEGORY_RANDOM_ALG;
         }
 
         if (gameID.equals(BST_SEARCH) || gameID.equals(BST_CONSTRUCTION)) {

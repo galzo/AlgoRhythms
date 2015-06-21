@@ -3,9 +3,13 @@ package com.algorythmsteam.algorythms;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.res.AssetFileDescriptor;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +27,8 @@ import android.widget.Toast;
 import com.handlers.AnimationHandler;
 import com.handlers.ResourceResolver;
 
+import java.io.IOException;
+
 public class GameIntroFragment extends AlgorhythmsFragment implements View.OnClickListener {
     public static final String TAG = "GameIntroFragment";
     private static final String ARG_GAME_TYPE = "game_type";
@@ -33,6 +39,7 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
     private TextView titleText, tipTitle, tipContent, nfcButtonDescription;
     private ImageView titleImage, background, likeButtonDescription, dislikeButtonDescription;
     private ImageButton backButton, playButton, instructionsButton, likeButton, dislikeButton, nfcButton, descriptionButton;
+    private MediaPlayer mediaPlayer;
 
     public static GameIntroFragment newInstance(String gameType) {
         GameIntroFragment fragment = new GameIntroFragment();
@@ -55,6 +62,10 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
 
         if (getArguments() != null) {
             gameType = getArguments().getString(ARG_GAME_TYPE);
+        }
+
+        if (mediaPlayer == null) {
+            mediaPlayer = new MediaPlayer();
         }
 
         try {
@@ -85,6 +96,7 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
         nfcButtonDescription.setTypeface(tf);
 
         titleImage.setImageResource(ResourceResolver.resolveGameNameImage(gameType));
+        titleText.setTextColor(getActivity().getResources().getColor(ResourceResolver.resolveGameTypeColor(gameType)));
         titleText.setText(ResourceResolver.resolveGameCategory(gameType));
 
         return root;
@@ -211,7 +223,10 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
                 break;
 
             case R.id.game_intro_screen_nfc_button:
-                //TODO: implmenet this
+                BubbleSortScanDialog dialog = BubbleSortScanDialog.newInstance(R.id.game_intro_screen_background_overlay);
+                FragmentManager fm = activity.getSupportFragmentManager();
+                dialog.show(fm, BubbleSortScanDialog.TAG);
+
                 break;
 
             case R.id.game_intro_screen_description_button:
@@ -265,6 +280,39 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
         AnimatorSet likeScaleIn = new AnimatorSet();
         likeScaleIn.playTogether(likeXScaleIn, likeYScaleIn);
         likeScaleIn.start();
+
+        if (mediaPlayer == null) {
+            mediaPlayer = new MediaPlayer();
+        }
+
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+        }
+
+        String playSound = (clickedButton.getId() == R.id.game_intro_screen_like_button)?
+                "yay.mp3" : "boo.mp3";
+
+        try {
+            mediaPlayer.reset();
+            AssetFileDescriptor afd;
+            afd = getActivity().getAssets().openFd(playSound);
+            mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    if (mp == mediaPlayer) {
+                        mediaPlayer.start();
+                    }
+                }
+            });
+            mediaPlayer.prepare();
+        }
+
+        catch (IOException e) {
+            mediaPlayer = null;
+            Log.e(TAG, "error loading the media player");
+            Log.e(TAG, e.getMessage());
+        }
     }
 
     private void showButtonsDescription() {
@@ -544,5 +592,15 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
     public boolean handleNfcScan(String res) {
         //TODO: implement this
         return true;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 }

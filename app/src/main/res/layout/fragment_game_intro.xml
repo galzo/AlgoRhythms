@@ -212,8 +212,14 @@
             android:src="@drawable/about_button"
             android:layout_marginLeft="10dp"
             android:alpha="0"/>
-
-
     </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/game_intro_screen_background_overlay"
+        android:alpha="0"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"/>
 
 </RelativeLayout>
