@@ -5,6 +5,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,12 +26,12 @@ import com.handlers.ResourceResolver;
 public class GameIntroFragment extends AlgorhythmsFragment implements View.OnClickListener {
     public static final String TAG = "GameIntroFragment";
     private static final String ARG_GAME_TYPE = "game_type";
-    private boolean isAnimInit, isGameRunning;
+    private boolean isAnimInit, isGameRunning, isButtonDescriptionDisplayed;
     private String gameType;
     private AlgoryhmsMainActivity activity;
     private View root, soundButtonsHolder, playGameButtonsHolder;
-    private TextView titleText, tipTitle, tipContent;
-    private ImageView titleImage, background, likeButtonDescription, dislikeButtonDescription, nfcButtonDescription;
+    private TextView titleText, tipTitle, tipContent, nfcButtonDescription;
+    private ImageView titleImage, background, likeButtonDescription, dislikeButtonDescription;
     private ImageButton backButton, playButton, instructionsButton, likeButton, dislikeButton, nfcButton, descriptionButton;
 
     public static GameIntroFragment newInstance(String gameType) {
@@ -50,6 +51,7 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
         super.onCreate(savedInstanceState);
         isGameRunning = false;
         isAnimInit = false;
+        isButtonDescriptionDisplayed = false;
 
         if (getArguments() != null) {
             gameType = getArguments().getString(ARG_GAME_TYPE);
@@ -74,11 +76,13 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
         playButton = (ImageButton) root.findViewById(R.id.game_intro_screen_play_button);
         instructionsButton = (ImageButton) root.findViewById(R.id.game_intro_screen_instructions_button);
         background = (ImageView) root.findViewById(R.id.game_intro_screen_background_grid);
+        nfcButtonDescription = (TextView) root.findViewById(R.id.game_intro_screen_nfc_button_description);
 
         Typeface tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/coopbl.TTF");
         titleText.setTypeface(tf);
         tipTitle.setTypeface(tf);
         tipContent.setTypeface(tf);
+        nfcButtonDescription.setTypeface(tf);
 
         titleImage.setImageResource(ResourceResolver.resolveGameNameImage(gameType));
         titleText.setText(ResourceResolver.resolveGameCategory(gameType));
@@ -160,7 +164,7 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                titleFlip.setStartDelay(6000);
+                titleFlip.setStartDelay(10000);
                 titleFlip.start();
             }
 
@@ -203,24 +207,23 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
                 break;
 
             case R.id.game_intro_screen_instructions_button:
-                //TODO: implement this
+                Toast.makeText(getActivity(), "Coming soon", Toast.LENGTH_LONG).show();
                 break;
 
             case R.id.game_intro_screen_nfc_button:
                 //TODO: implmenet this
-                Toast.makeText(getActivity(), "lol", Toast.LENGTH_LONG).show();
                 break;
 
             case R.id.game_intro_screen_description_button:
-                //TODO: implement this
+                showButtonsDescription();
                 break;
 
             case R.id.game_intro_screen_like_button:
-                //TODO: implement this
+                handleSoundButtonClick(v);
                 break;
 
             case R.id.game_intro_screen_dislike_button:
-                //TODO: implement this
+                handleSoundButtonClick(v);
                 break;
 
             default:
@@ -228,15 +231,118 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
         }
     }
 
+    private void handleSoundButtonClick(final View clickedButton) {
+        clickedButton.setOnClickListener(null); //to avoid bugs related to multiple fast clicks
+        ObjectAnimator likeXScaleIn = AnimationHandler.generateXScaleAnimation(clickedButton, 1, 0.5f, 200, 0, null);
+        final ObjectAnimator likeYScaleIn = AnimationHandler.generateYScaleAnimation(clickedButton, 1, 0.5f, 200, 0, null);
+        likeYScaleIn.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                clickedButton.setOnClickListener(GameIntroFragment.this);
+                ObjectAnimator likeXScaleOut = AnimationHandler.generateXScaleAnimation(clickedButton, 0.5f, 1, 400, 0, new OvershootInterpolator());
+                ObjectAnimator likeYScaleOut = AnimationHandler.generateYScaleAnimation(clickedButton, 0.5f, 1, 400, 0, new OvershootInterpolator());
+                AnimatorSet likeScaleOut = new AnimatorSet();
+                likeScaleOut.playTogether(likeXScaleOut, likeYScaleOut);
+                likeScaleOut.start();
+                likeYScaleIn.removeAllListeners();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        AnimatorSet likeScaleIn = new AnimatorSet();
+        likeScaleIn.playTogether(likeXScaleIn, likeYScaleIn);
+        likeScaleIn.start();
+    }
+
+    private void showButtonsDescription() {
+        isButtonDescriptionDisplayed = true;
+        descriptionButton.setOnClickListener(null); //to avoid bugs related to multiple quick clicks on that button
+        ObjectAnimator nfcButtonFlip = AnimationHandler.generateAnimation(nfcButton, "rotationY", 0, 90, 500, 0, new AnticipateInterpolator());
+        ObjectAnimator likeButtonFlip = AnimationHandler.generateAnimation(likeButton, "rotationY", 0, 90, 500, 120, new AnticipateInterpolator());
+        ObjectAnimator dislikeButtonFlip = AnimationHandler.generateAnimation(dislikeButton, "rotationY", 0, 90, 500, 240, new AnticipateInterpolator());
+
+        ObjectAnimator nfcTextFlip = AnimationHandler.generateAnimation(nfcButtonDescription, "rotationY", 270, 360, 500, 500, new OvershootInterpolator());
+        ObjectAnimator nfcTextFadeIn = AnimationHandler.generateAlphaAnimation(nfcButtonDescription, 0, 1, 10, 500, null);
+        ObjectAnimator likeTextFlip = AnimationHandler.generateAnimation(likeButtonDescription, "rotationY", 270, 360, 500, 620, new OvershootInterpolator());
+        ObjectAnimator likeTextFadeIn = AnimationHandler.generateAlphaAnimation(likeButtonDescription, 0, 1, 10, 620, null);
+        ObjectAnimator dislikeTextFlip = AnimationHandler.generateAnimation(dislikeButtonDescription, "rotationY", 270, 360, 500, 740, new OvershootInterpolator());
+        ObjectAnimator dislikeTextFadeIn = AnimationHandler.generateAlphaAnimation(dislikeButtonDescription, 0, 1, 10, 740, null);
+        AnimatorSet as = new AnimatorSet();
+        as.playTogether(nfcButtonFlip, likeButtonFlip, dislikeButtonFlip, nfcTextFlip, nfcTextFadeIn, likeTextFlip, likeTextFadeIn, dislikeTextFlip, dislikeTextFadeIn);
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                ObjectAnimator nfcTextFlip = AnimationHandler.generateAnimation(nfcButtonDescription, "rotationY", 0, 90, 500, 0, new AnticipateInterpolator());
+                ObjectAnimator nfcTextFadeOut = AnimationHandler.generateAlphaAnimation(nfcButtonDescription, 1, 0, 1500, 0, null);
+                ObjectAnimator likeTextFlip = AnimationHandler.generateAnimation(likeButtonDescription, "rotationY", 0, 90, 500, 120, new AnticipateInterpolator());
+                ObjectAnimator likeTextFadeOut = AnimationHandler.generateAlphaAnimation(likeButtonDescription, 1, 0, 1500, 120, null);
+                ObjectAnimator dislikeTextFlip = AnimationHandler.generateAnimation(dislikeButtonDescription, "rotationY", 0, 90, 500, 240, new AnticipateInterpolator());
+                ObjectAnimator dislikeTextFadeOut = AnimationHandler.generateAlphaAnimation(dislikeButtonDescription, 1, 0, 1500, 240, null);
+
+                ObjectAnimator nfcButtonFlip = AnimationHandler.generateAnimation(nfcButton, "rotationY", 270, 360, 500, 500, new OvershootInterpolator());
+                ObjectAnimator likeButtonFlip = AnimationHandler.generateAnimation(likeButton, "rotationY", 270, 360, 500, 620, new OvershootInterpolator());
+                final ObjectAnimator dislikeButtonFlip = AnimationHandler.generateAnimation(dislikeButton, "rotationY", 270, 360, 500, 740, new OvershootInterpolator());
+                dislikeButtonFlip.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        descriptionButton.setOnClickListener(GameIntroFragment.this);
+                        dislikeButtonFlip.removeAllListeners();
+                        isButtonDescriptionDisplayed = false;
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
+
+                AnimatorSet as = new AnimatorSet();
+                as.playTogether(nfcTextFlip, nfcTextFadeOut, likeTextFlip, likeTextFadeOut, dislikeTextFlip, dislikeTextFadeOut, nfcButtonFlip, likeButtonFlip, dislikeButtonFlip);
+                as.start();
+            }
+        }, 4000);
+
+        as.start();
+    }
+
     private void startGame() {
         soundButtonsHolder = root.findViewById(R.id.game_intro_screen_sound_buttons);
         playGameButtonsHolder = root.findViewById(R.id.game_intro_screen_play_game_buttons);
         soundButtonsHolder.setVisibility(View.VISIBLE);
         playGameButtonsHolder.setVisibility(View.VISIBLE);
+
         nfcButton = (ImageButton) root.findViewById(R.id.game_intro_screen_nfc_button);
         descriptionButton = (ImageButton) root.findViewById(R.id.game_intro_screen_description_button);
         likeButton = (ImageButton) root.findViewById(R.id.game_intro_screen_like_button);
         dislikeButton = (ImageButton) root.findViewById(R.id.game_intro_screen_dislike_button);
+
+        likeButtonDescription = (ImageView) root.findViewById(R.id.game_intro_screen_like_button_description);
+        dislikeButtonDescription = (ImageView) root.findViewById(R.id.game_intro_screen_dislike_button_description);
 
         float yOffset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(400);
         float topYOffset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(80);
@@ -407,7 +513,12 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
     @Override
     public boolean handleBackPress() {
         if (activity != null) {
-            //if the game is currently running ("play game was pressed")
+            //if buttons description is displayed - ignore the back press
+            if (isButtonDescriptionDisplayed) {
+                return true;
+            }
+
+            //if the game is currently running (play game was pressed)
             //we want to move back to gameIntroScreen
             if (isGameRunning) {
                 exitGame();
