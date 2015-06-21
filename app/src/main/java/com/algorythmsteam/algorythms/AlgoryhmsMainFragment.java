@@ -222,7 +222,7 @@ public class AlgoryhmsMainFragment extends AlgorhythmsFragment
                     as.playTogether(nfcTextFlip, nfcTextFadeOut, qrTextFlip, qrTextFadeOut, nfcButtonFlip, qrButtonFlip);
                     as.start();
                 }
-            }, 1500);
+            }, 3000);
 
         }
 

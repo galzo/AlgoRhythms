@@ -29,6 +29,7 @@ public class QRScanFragment extends AlgorhythmsFragment {
     private View root;
     private AlgoryhmsMainActivity activity;
     private QRScanCallback scanCallback;
+    private boolean isAnimInit;
 
     public QRScanFragment() {
         // Required empty public constructor
@@ -43,6 +44,7 @@ public class QRScanFragment extends AlgorhythmsFragment {
             Log.e(TAG, "Activity should be of type AlgoryhmsMainActivity");
         }
 
+        isAnimInit = false;
     }
 
     @Override
@@ -64,6 +66,7 @@ public class QRScanFragment extends AlgorhythmsFragment {
     public void onStart() {
         super.onStart();
         initAnimations();
+        isAnimInit = true;
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -76,6 +79,10 @@ public class QRScanFragment extends AlgorhythmsFragment {
     }
 
     private void initAnimations() {
+        if (isAnimInit) {
+            return;
+        }
+        
         float yOffset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(-300);
         ObjectAnimator titleDragDown = AnimationHandler.generateYAnimation(qrTitle, yOffset, 0, 750, 40, new OvershootInterpolator());
         ObjectAnimator titleFadeIn = AnimationHandler.generateAlphaAnimation(qrTitle, 0, 1, 30, 0, null);

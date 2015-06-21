@@ -25,6 +25,7 @@ public class NFCScanFragment extends AlgorhythmsFragment {
     private TextView nfcDescription;
     private ImageView nfcTitle;
     private AlgoryhmsMainActivity activity;
+    private boolean isAnimInit;
 
     public NFCScanFragment() {
         // Required empty public constructor
@@ -38,6 +39,8 @@ public class NFCScanFragment extends AlgorhythmsFragment {
         } catch (ClassCastException e) {
             Log.e(TAG, "activity should be of type AlgoryhmsMainActivity");
         }
+
+        isAnimInit = false;
     }
 
     @Override
@@ -54,12 +57,17 @@ public class NFCScanFragment extends AlgorhythmsFragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
         initAnimations();
+        isAnimInit = true;
     }
 
     private void initAnimations() {
+        if (isAnimInit) {
+            return;
+        }
+
         float yOffset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(-300);
         ObjectAnimator titleDragDown = AnimationHandler.generateYAnimation(nfcTitle, yOffset, 0, 750, 40, new OvershootInterpolator());
         ObjectAnimator titleFadeIn = AnimationHandler.generateAlphaAnimation(nfcTitle, 0, 1, 30, 0, null);

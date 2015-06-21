@@ -149,7 +149,7 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
 
         AnimatorSet tipAnims = new AnimatorSet();
         ObjectAnimator tipTitleFadeIn = AnimationHandler.generateAlphaAnimation(tipTitle, 0, 1, 600, 0, new DecelerateInterpolator());
-        ObjectAnimator tipContentFadeIn = AnimationHandler.generateAlphaAnimation(tipContent, 0, 1, 600, 300, new DecelerateInterpolator());
+        ObjectAnimator tipContentFadeIn = AnimationHandler.generateAlphaAnimation(tipContent, 0, 1, 600, 200, new DecelerateInterpolator());
         tipAnims.playTogether(tipTitleFadeIn, tipContentFadeIn);
 
         AnimatorSet buttonAnims = new AnimatorSet();
@@ -504,8 +504,13 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
         AnimatorSet buttonsPopIn = new AnimatorSet();
         buttonsPopIn.playTogether(backPopIn, playPopIn, instructionsPopIn);
 
+        AnimatorSet tipAnims = new AnimatorSet();
+        ObjectAnimator tipTitleFadeIn = AnimationHandler.generateAlphaAnimation(tipTitle, 0, 1, 600, 600, new DecelerateInterpolator());
+        ObjectAnimator tipContentFadeIn = AnimationHandler.generateAlphaAnimation(tipContent, 0, 1, 600, 150, new DecelerateInterpolator());
+        tipAnims.playTogether(tipTitleFadeIn, tipContentFadeIn);
+
         AnimatorSet as = new AnimatorSet();
-        as.play(buttonsPopOut).with(titleSlide).before(buttonsPopIn);
+        as.play(buttonsPopOut).with(titleSlide).with(tipAnims).before(buttonsPopIn);
         as.setStartDelay(100);
         as.start();
     }
