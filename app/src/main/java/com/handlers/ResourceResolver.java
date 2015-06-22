@@ -1,6 +1,8 @@
 package com.handlers;
 
 import android.graphics.Color;
+import android.nfc.Tag;
+import android.util.Log;
 
 import com.algorythmsteam.algorythms.R;
 
@@ -19,7 +21,98 @@ public class ResourceResolver {
     public static final String CATEGORY_SEARCH_ALG = "Search Algorithm";
     public static final String CATEGORY_RANDOM_ALG = "Random Based Algorithm";
 
+    public static final String CARD_TYPE_NUMBERS = "numbers";
+    public static final String CARD_TYPE_SHAPES = "shapes";
+
     public static final int UNDEFINED_RESOURCE = -1;
+
+    public static boolean isCardTypeValid(String cardType) {
+        if (cardType == null) {
+            return false;
+        }
+
+        return cardType.equals(CARD_TYPE_NUMBERS) || cardType.equals(CARD_TYPE_SHAPES);
+    }
+
+    public static int resolveCardImage(String cardType, int cardNumber) {
+        if (cardType == null) {
+            return UNDEFINED_RESOURCE;
+        }
+
+        if (cardType.equals(CARD_TYPE_NUMBERS)) {
+            switch (cardNumber) {
+                case 1:
+                    return R.drawable.number_1;
+
+                case 2:
+                    return R.drawable.number_2;
+
+                case 3:
+                    return R.drawable.number_3;
+
+                case 4:
+                    return R.drawable.number_4;
+
+                case 5:
+                    return R.drawable.number_5;
+
+                case 6:
+                    return R.drawable.number_6;
+
+                case 7:
+                    return R.drawable.number_7;
+
+                case 8:
+                    return R.drawable.number_8;
+
+                case 9:
+                    return R.drawable.number_9;
+
+                case 10:
+                    return R.drawable.number_10;
+
+                default:
+                    return UNDEFINED_RESOURCE;
+            }
+        } else if (cardType.equals(CARD_TYPE_SHAPES)) {
+            switch (cardNumber) {
+                case 1:
+                    return R.drawable.shape_1;
+
+                case 2:
+                    return R.drawable.shape_2;
+
+                case 3:
+                    return R.drawable.shape_3;
+
+                case 4:
+                    return R.drawable.shape_4;
+
+                case 5:
+                    return R.drawable.shape_5;
+
+                case 6:
+                    return R.drawable.shape_6;
+
+                case 7:
+                    return R.drawable.shape_7;
+
+                case 8:
+                    return R.drawable.shape_8;
+
+                case 9:
+                    return R.drawable.shape_9;
+
+                case 10:
+                    return R.drawable.shape_10;
+
+                default:
+                    return UNDEFINED_RESOURCE;
+            }
+        }
+
+        return UNDEFINED_RESOURCE;
+    }
 
     public static int resolveVideoResource(String gameId) {
         if (gameId == null) {
@@ -142,5 +235,24 @@ public class ResourceResolver {
             }
         }
         return String.valueOf(chars);
+    }
+
+    /**
+     * This method return -1 in case the card number is illegal (i.e - not a number
+     * or is out of numbers range (1 - 10)
+     */
+    public static int convertCardNumberToInt(String cardNumber) {
+        int number = UNDEFINED_RESOURCE;
+        try {
+            int num = Integer.parseInt(cardNumber);
+            if (num >= 1 && num <= 10) {
+                number = num;
+            }
+
+        } catch (NumberFormatException e) {
+            Log.e("ResourceResolver", "card with wrong number value was scanned");
+        }
+
+        return number;
     }
 }

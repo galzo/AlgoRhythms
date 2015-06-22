@@ -7,6 +7,7 @@
 
     <ImageView
         android:id="@+id/dialog_bubble_sort_scan_nfc_icon"
+        android:alpha="0"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_marginTop="30dp"
@@ -17,6 +18,7 @@
 
     <TextView
         android:id="@+id/dialog_bubble_sort_title"
+        android:alpha="0"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
@@ -34,10 +36,12 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="35dp"
+        android:animateLayoutChanges="true"
         android:layout_below="@id/dialog_bubble_sort_title">
 
         <ImageView
             android:id="@+id/dialog_bubble_sort_left_card_icon"
+            android:alpha="0"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:scaleType="fitCenter"
@@ -58,6 +62,7 @@
 
     <ImageView
         android:id="@+id/dialog_bubble_sort_move_indicator_icon"
+        android:alpha="0"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginTop="40dp"

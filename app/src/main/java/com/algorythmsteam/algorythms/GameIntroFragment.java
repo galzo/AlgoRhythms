@@ -29,7 +29,7 @@ import com.handlers.ResourceResolver;
 
 import java.io.IOException;
 
-public class GameIntroFragment extends AlgorhythmsFragment implements View.OnClickListener {
+public class GameIntroFragment extends AlgorhythmsFragment implements View.OnClickListener, AlgorhythmsDialogFragment.DialogClosedCallback {
     public static final String TAG = "GameIntroFragment";
     private static final String ARG_GAME_TYPE = "game_type";
     private boolean isAnimInit, isGameRunning, isButtonDescriptionDisplayed;
@@ -40,6 +40,7 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
     private ImageView titleImage, background, likeButtonDescription, dislikeButtonDescription;
     private ImageButton backButton, playButton, instructionsButton, likeButton, dislikeButton, nfcButton, descriptionButton;
     private MediaPlayer mediaPlayer;
+    private AlgorhythmsDialogFragment dialog;
 
     public static GameIntroFragment newInstance(String gameType) {
         GameIntroFragment fragment = new GameIntroFragment();
@@ -223,9 +224,17 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
                 break;
 
             case R.id.game_intro_screen_nfc_button:
-                BubbleSortScanDialog dialog = BubbleSortScanDialog.newInstance(R.id.game_intro_screen_background_overlay);
-                FragmentManager fm = activity.getSupportFragmentManager();
-                dialog.show(fm, BubbleSortScanDialog.TAG);
+                AlgorhythmsDialogFragment scanDialog = null;
+
+                if (gameType.equals(ResourceResolver.BUBBLE_SORT)) {
+                    scanDialog = BubbleSortScanDialog.newInstance(R.id.game_intro_screen_background_overlay);
+                }
+
+                if (scanDialog != null) {
+                    dialog = scanDialog;
+                    FragmentManager fm = activity.getSupportFragmentManager();
+                    dialog.show(fm, BubbleSortScanDialog.TAG);
+                }
 
                 break;
 
@@ -590,7 +599,10 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
 
     @Override
     public boolean handleNfcScan(String res) {
-        //TODO: implement this
+        //if the game scan dialog is opened - let it handle the scan
+        if (dialog != null) {
+            dialog.handleNfcScan(res);
+        }
         return true;
     }
 
@@ -602,5 +614,10 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
             mediaPlayer.release();
             mediaPlayer = null;
         }
+    }
+
+    @Override
+    public void onDialogClosed() {
+        this.dialog = null;
     }
 }

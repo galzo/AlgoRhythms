@@ -86,9 +86,12 @@ public class AlgoryhmsMainActivity extends ActionBarActivity implements QRScanFr
         //lets first validate that the read result is of the format of Algorythms NFC text
         //(I.E - Algorhythms#X where X is the value of the card) - if its not, then do not handle it
         if (result != null && result.trim().length() != 0) {
-            String[] splitRes = result.split("#");
-            if (splitRes.length >= 2 && splitRes[0].equals("algorhythms")) {
+            Log.i(TAG, "got scan result: " + result);
+            String[] splitRes = result.split("#", 2);
+            if (splitRes.length == 2 && splitRes[0].equals("algorhythms")) {
                 res = splitRes[1].trim();
+                Log.i(TAG, "first part of tag is: " + splitRes[0]);
+                Log.i(TAG, "second part of tag is: " + splitRes[1]);
             }
         }
 
@@ -247,5 +250,9 @@ public class AlgoryhmsMainActivity extends ActionBarActivity implements QRScanFr
         if (nfcAdapter != null && nfcAdapter.isEnabled()) {
             handleIntent(intent);
         }
+    }
+
+    public AlgorhythmsFragment getCurrFrag() {
+        return _currFrag;
     }
 }
