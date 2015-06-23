@@ -24,10 +24,6 @@ public class AnimationHandler {
      */
     public static ObjectAnimator generateAnimation(View v, String property, float firstVal, float secondVal,
                                                    int duration, int startDelay, TimeInterpolator interpolator) {
-        if (v == null) {
-            return null;
-        }
-
         ObjectAnimator anim = ObjectAnimator.ofFloat(v, property, firstVal, secondVal);
         anim.setDuration(duration);
         anim.setStartDelay(startDelay);

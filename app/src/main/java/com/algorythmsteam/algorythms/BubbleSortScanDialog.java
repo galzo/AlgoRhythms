@@ -2,6 +2,7 @@ package com.algorythmsteam.algorythms;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
+import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
@@ -42,6 +43,63 @@ public class BubbleSortScanDialog extends AlgorhythmsDialogFragment implements V
 
     public BubbleSortScanDialog() {
         //required empty constructor
+    }
+
+    public static BubbleSortScanDialog newInstance(int backgroundViewId) {
+        BubbleSortScanDialog dialog = new BubbleSortScanDialog();
+        Bundle args = new Bundle();
+        args.putInt(BACKGROUND_VIEW_ID, backgroundViewId);
+        dialog.setArguments(args);
+        dialog.setStyle(DialogFragment.STYLE_NO_FRAME, 0);
+        return dialog;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        state = ScanState.INITIALIZING;
+        isAnimInit = false;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        root = inflater.inflate(R.layout.dialog_bubble_sort_scan, container);
+        super.setBackgroundView();
+
+        dialogTitle = (TextView) root.findViewById(R.id.dialog_bubble_sort_title);
+        nfcIcon = (ImageView) root.findViewById(R.id.dialog_bubble_sort_scan_nfc_icon);
+        leftCardIcon = (ImageView) root.findViewById(R.id.dialog_bubble_sort_left_card_icon);
+        rightCardIcon = (ImageView) root.findViewById(R.id.dialog_bubble_sort_right_card_icon);
+        moveIndicatorButton = (ImageView) root.findViewById(R.id.dialog_bubble_sort_move_indicator_icon);
+
+        ViewGroup cardsHolder = (ViewGroup) root.findViewById(R.id.dialog_bubble_sort_cards_holder);
+        LayoutTransition transitioner = new LayoutTransition();
+        AnimatorSet popIn = AnimationHandler.generatePopInAnimation(null, 0, 1, 500, 100, new OvershootInterpolator(1));
+        transitioner.setAnimator(LayoutTransition.APPEARING, popIn);
+        cardsHolder.setLayoutTransition(transitioner);
+
+        Typeface tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/coopbl.TTF");
+        dialogTitle.setTypeface(tf);
+        root.setOnClickListener(this);
+
+        return root;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (isAnimInit) {
+            return;
+        }
+
+        AnimatorSet nfcPopIn = AnimationHandler.generatePopInAnimation(nfcIcon, 0, 1, 500, 0, new OvershootInterpolator());
+        AnimatorSet titlePopIn = AnimationHandler.generatePopInAnimation(dialogTitle, 0, 1, 500, 120, new OvershootInterpolator());
+        AnimatorSet as = new AnimatorSet();
+        as.playTogether(nfcPopIn, titlePopIn);
+        as.start();
+
+        isAnimInit = true;
+        state = ScanState.STATE_WAITING_FIRST_CARD;
     }
 
     /**
@@ -85,7 +143,7 @@ public class BubbleSortScanDialog extends AlgorhythmsDialogFragment implements V
     @Override
     public void handleNfcScan(String res) {
         //dialog is not yet ready to receive any scan
-        if (state == ScanState.INITIALIZING) {
+        if (state == ScanState.INITIALIZING || state == ScanState.STATE_DONE) {
             return;
         }
 
@@ -113,6 +171,7 @@ public class BubbleSortScanDialog extends AlgorhythmsDialogFragment implements V
                     dialogTitle.setText("Now scan the right opened card");
                     ObjectAnimator titleFadeIn = AnimationHandler.generateAlphaAnimation(dialogTitle, 0, 1, 300, 20, null);
                     titleFadeIn.start();
+                    state = ScanState.STATE_WAITING_SECOND_CARD;
                 }
 
                 @Override
@@ -129,15 +188,23 @@ public class BubbleSortScanDialog extends AlgorhythmsDialogFragment implements V
         }
 
         if (state == ScanState.STATE_WAITING_SECOND_CARD) {
+            state = ScanState.INITIALIZING; //to avoid multiple scans
             //first lets check that we're scanning a card of the same type as the previous card
             String cardType = scanResult.getString("card_type");
             if (!cardType.equals(cardsType)) {
                 Toast.makeText(getActivity(), "Cards type mismatch", Toast.LENGTH_LONG).show();
+                state = ScanState.STATE_WAITING_SECOND_CARD;
                 return;
             }
 
-            state = ScanState.INITIALIZING; //to avoid multiple scans
-            rightCardNumber = scanResult.getInt("card_number");
+            int cardNumber = scanResult.getInt("card_number");
+            if (cardNumber == leftCardNumber) {
+                Toast.makeText(getActivity(), "You scanned the same card twice!", Toast.LENGTH_LONG).show();
+                state = ScanState.STATE_WAITING_SECOND_CARD;
+                return;
+            }
+
+            rightCardNumber = cardNumber;
             int cardImageRes = scanResult.getInt("card_image_res");
             showCard(cardImageRes, rightCardIcon);
         }
@@ -150,84 +217,14 @@ public class BubbleSortScanDialog extends AlgorhythmsDialogFragment implements V
 
         if (cardToShow.getId() == R.id.dialog_bubble_sort_left_card_icon) {
             cardToShow.setImageResource(cardImageRes);
-            AnimatorSet cardPopIn = AnimationHandler.generatePopInAnimation(cardToShow, 0, 1, 500, 20, new OvershootInterpolator());
-            cardPopIn.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animator) {
+            cardToShow.setVisibility(View.VISIBLE);
 
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animator) {
-                    state = ScanState.STATE_WAITING_SECOND_CARD;
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animator) {
-
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animator) {
-
-                }
-            });
-            cardPopIn.start();
         } else if (cardToShow.getId() == R.id.dialog_bubble_sort_right_card_icon) {
+            View cardsSeparator = root.findViewById(R.id.dialog_bubble_sort_cards_separator);
             cardToShow.setImageResource(cardImageRes);
+            cardsSeparator.setVisibility(View.VISIBLE);
             cardToShow.setVisibility(View.VISIBLE);
         }
-    }
-
-    public static BubbleSortScanDialog newInstance(int backgroundViewId) {
-        BubbleSortScanDialog dialog = new BubbleSortScanDialog();
-        Bundle args = new Bundle();
-        args.putInt(BACKGROUND_VIEW_ID, backgroundViewId);
-        dialog.setArguments(args);
-        dialog.setStyle(DialogFragment.STYLE_NO_FRAME, 0);
-        return dialog;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        state = ScanState.INITIALIZING;
-        isAnimInit = false;
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        root = inflater.inflate(R.layout.dialog_bubble_sort_scan, container);
-        super.setBackgroundView();
-
-        dialogTitle = (TextView) root.findViewById(R.id.dialog_bubble_sort_title);
-        nfcIcon = (ImageView) root.findViewById(R.id.dialog_bubble_sort_scan_nfc_icon);
-        leftCardIcon = (ImageView) root.findViewById(R.id.dialog_bubble_sort_left_card_icon);
-        rightCardIcon = (ImageView) root.findViewById(R.id.dialog_bubble_sort_right_card_icon);
-        moveIndicatorButton = (ImageView) root.findViewById(R.id.dialog_bubble_sort_move_indicator_icon);
-
-        Typeface tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/coopbl.TTF");
-        dialogTitle.setTypeface(tf);
-        root.setOnClickListener(this);
-
-        return root;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (isAnimInit) {
-            return;
-        }
-
-        AnimatorSet nfcPopIn = AnimationHandler.generatePopInAnimation(nfcIcon, 0, 1, 500, 0, new OvershootInterpolator());
-        AnimatorSet titlePopIn = AnimationHandler.generatePopInAnimation(dialogTitle, 0, 1, 500, 120, new OvershootInterpolator());
-        AnimatorSet as = new AnimatorSet();
-        as.playTogether(nfcPopIn, titlePopIn);
-        as.start();
-
-        isAnimInit = true;
-        state = ScanState.STATE_WAITING_FIRST_CARD;
     }
 
     @Override
