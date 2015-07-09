@@ -36,7 +36,7 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
     private String gameType;
     private AlgoryhmsMainActivity activity;
     private View root, soundButtonsHolder, playGameButtonsHolder;
-    private TextView titleText, tipTitle, tipContent, nfcButtonDescription;
+    private TextView titleText, tipTitle, tipContent, playTipTitle, playTipContent ,nfcButtonDescription;
     private ImageView titleImage, background, likeButtonDescription, dislikeButtonDescription;
     private ImageButton backButton, playButton, instructionsButton, likeButton, dislikeButton, nfcButton, descriptionButton;
     private MediaPlayer mediaPlayer;
@@ -230,6 +230,11 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
                     scanDialog = BubbleSortScanDialog.newInstance(R.id.game_intro_screen_background_overlay);
                 }
 
+                if (gameType.equals(ResourceResolver.QUICK_SORT)) {
+                    scanDialog = QuickSortScanDialog.newInstance(R.id.game_intro_screen_background_overlay);
+                }
+
+                //if we managed to create a new dialog - lets show it
                 if (scanDialog != null) {
                     dialog = scanDialog;
                     FragmentManager fm = activity.getSupportFragmentManager();
@@ -397,6 +402,11 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
         descriptionButton = (ImageButton) root.findViewById(R.id.game_intro_screen_description_button);
         likeButton = (ImageButton) root.findViewById(R.id.game_intro_screen_like_button);
         dislikeButton = (ImageButton) root.findViewById(R.id.game_intro_screen_dislike_button);
+        playTipTitle = (TextView) root.findViewById(R.id.game_intro_screen_play_tip_title);
+        playTipContent = (TextView) root.findViewById(R.id.game_intro_screen_play_tip_content);
+        Typeface tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/coopbl.TTF");
+        playTipTitle.setTypeface(tf);
+        playTipContent.setTypeface(tf);
 
         likeButtonDescription = (ImageView) root.findViewById(R.id.game_intro_screen_like_button_description);
         dislikeButtonDescription = (ImageView) root.findViewById(R.id.game_intro_screen_dislike_button_description);
@@ -480,8 +490,13 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
             }
         });
 
+        AnimatorSet playTipAnims = new AnimatorSet();
+        ObjectAnimator tipTitleFadeIn = AnimationHandler.generateAlphaAnimation(playTipTitle, 0, 1, 600, 600, new DecelerateInterpolator());
+        ObjectAnimator tipContentFadeIn = AnimationHandler.generateAlphaAnimation(playTipContent, 0, 1, 600, 150, new DecelerateInterpolator());
+        playTipAnims.playTogether(tipTitleFadeIn, tipContentFadeIn);
+
         AnimatorSet as = new AnimatorSet();
-        as.play(titleSlide).with(tipFadeOut).with(buttonsPopOut).with(soundButtonsPopIn).before(playGameButtonsPopIn);
+        as.play(titleSlide).with(tipFadeOut).with(buttonsPopOut).with(soundButtonsPopIn).with(playTipAnims).before(playGameButtonsPopIn);
         as.setStartDelay(100);
         as.start();
     }
@@ -496,6 +511,11 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
         AnimatorSet titleSlide = new AnimatorSet();
         titleSlide.playTogether(titleLower, categorySlideIn);
         titleSlide.setStartDelay(200);
+
+        ObjectAnimator tipTitleFadeOut = AnimationHandler.generateAlphaAnimation(playTipTitle, 1, 0, 300, 0, null);
+        ObjectAnimator tipContentFadeOut = AnimationHandler.generateAlphaAnimation(playTipContent, 1, 0, 300, 0, null);
+        AnimatorSet playTipFadeOut = new AnimatorSet();
+        playTipFadeOut.playTogether(tipTitleFadeOut, tipContentFadeOut);
 
         AnimatorSet nfcButtonPopOut = AnimationHandler.generatePopOutAnimation(nfcButton, 1, 0, 500, 0, new AnticipateInterpolator(0.8f));
         AnimatorSet descriptionButtonPopOut = AnimationHandler.generatePopOutAnimation(descriptionButton, 1, 0, 500, 150, new AnticipateInterpolator(0.8f));
@@ -567,7 +587,7 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
         tipAnims.playTogether(tipTitleFadeIn, tipContentFadeIn);
 
         AnimatorSet as = new AnimatorSet();
-        as.play(buttonsPopOut).with(titleSlide).with(tipAnims).before(buttonsPopIn);
+        as.play(buttonsPopOut).with(titleSlide).with(tipAnims).with(playTipFadeOut).before(buttonsPopIn);
         as.setStartDelay(100);
         as.start();
     }

@@ -225,7 +225,7 @@ public class BubbleSortScanDialog extends AlgorhythmsDialogFragment implements V
             titleColor = getResources().getColor(R.color.algorythms_red);
         }
 
-        ObjectAnimator titleFadeOut = AnimationHandler.generateAlphaAnimation(dialogTitle, 1, 0, 300, 20, null);
+        final ObjectAnimator titleFadeOut = AnimationHandler.generateAlphaAnimation(dialogTitle, 1, 0, 300, 20, null);
         titleFadeOut.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animator) {
@@ -238,6 +238,7 @@ public class BubbleSortScanDialog extends AlgorhythmsDialogFragment implements V
                 dialogTitle.setTextColor(titleColor);
                 ObjectAnimator titleFadeIn = AnimationHandler.generateAlphaAnimation(dialogTitle, 0, 1, 300, 20, null);
                 titleFadeIn.start();
+                titleFadeOut.removeAllListeners();
             }
 
             @Override
@@ -291,8 +292,6 @@ public class BubbleSortScanDialog extends AlgorhythmsDialogFragment implements V
 
     @Override
     public void onClick(View view) {
-        if (view.getId() == root.getId()) {
-            dismiss();
-        }
+        dismiss();
     }
 }

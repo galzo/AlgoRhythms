@@ -34,6 +34,22 @@ public class ResourceResolver {
         return cardType.equals(CARD_TYPE_NUMBERS) || cardType.equals(CARD_TYPE_SHAPES);
     }
 
+    public static int resolveBlankCardImage(String cardType) {
+        if (cardType == null) {
+            return R.drawable.blank_card_grey;
+        }
+
+        if (cardType.equals(CARD_TYPE_NUMBERS)) {
+            return R.drawable.blank_card_red;
+        }
+
+        if (cardType.equals(CARD_TYPE_SHAPES)) {
+            return R.drawable.blank_card_blue;
+        }
+
+        return R.drawable.blank_card_grey;
+    }
+
     public static int resolveCardImage(String cardType, int cardNumber) {
         if (cardType == null) {
             return UNDEFINED_RESOURCE;

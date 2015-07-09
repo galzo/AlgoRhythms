@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <ImageView
+        android:id="@+id/dialog_quick_sort_scan_nfc_icon"
+        android:alpha="0"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="30dp"
+        android:background="@android:color/transparent"
+        android:scaleType="fitCenter"
+        android:src="@drawable/nfc_scan_icon"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:id="@+id/dialog_quick_sort_title"
+        android:alpha="0"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:layout_below="@+id/dialog_quick_sort_scan_nfc_icon"
+        android:text="Please Scan the card located between the cups"
+        android:textSize="25dp"
+        android:textColor="@color/algorythms_blue"/>
+
+    <LinearLayout
+        android:id="@+id/dialog_quick_sort_cards_holder"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="35dp"
+        android:layout_below="@id/dialog_quick_sort_title">
+
+        <ImageView
+            android:id="@+id/dialog_quick_sort_left_cup"
+            android:alpha="0"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:scaleType="fitCenter"
+            android:background="@android:color/transparent"
+            android:src="@drawable/cup_icon"/>
+
+        <ImageView
+            android:id="@+id/dialog_quick_sort_pivot_card_icon"
+            android:alpha="0"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:scaleType="fitCenter"
+            android:layout_gravity="bottom"
+            android:background="@android:color/transparent"
+            android:src="@drawable/blank_card_grey"/>
+
+        <ImageView
+            android:id="@+id/dialog_quick_sort_right_cup"
+            android:alpha="0"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:scaleType="fitCenter"
+            android:background="@android:color/transparent"
+            android:src="@drawable/cup_icon"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/dialog_quick_sort_pivot_card_text"
+        android:alpha="0"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:textSize="15dp"
+        android:gravity="center"
+        android:textColor="@color/algorythms_red"
+        android:text="this is the pivot card"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/dialog_quick_sort_cards_holder"/>
+
+    <ImageView
+        android:id="@+id/dialog_quick_sort_second_card_icon"
+        android:alpha="0"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/dialog_quick_sort_cards_holder"
+        android:layout_marginTop="60dp"
+        android:scaleType="fitCenter"
+        android:background="@android:color/transparent"
+        android:src="@drawable/blank_card_grey"/>
+
+    <ImageView
+        android:id="@+id/dialog_quick_sort_move_indicator_icon"
+        android:alpha="0"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="50dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/dialog_quick_sort_cards_holder"
+        android:scaleType="fitCenter"
+        android:background="@android:color/transparent"
+        android:src="@drawable/like_button"/>
+
+</RelativeLayout>
