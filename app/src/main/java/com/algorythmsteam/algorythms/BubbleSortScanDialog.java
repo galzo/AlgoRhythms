@@ -4,15 +4,14 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
-import android.content.DialogInterface;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AnticipateInterpolator;
+import android.view.animation.BounceInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.TextView;
 import android.widget.ImageView;
@@ -204,10 +203,73 @@ public class BubbleSortScanDialog extends AlgorhythmsDialogFragment implements V
                 return;
             }
 
+            state = ScanState.STATE_DONE;
             rightCardNumber = cardNumber;
             int cardImageRes = scanResult.getInt("card_image_res");
             showCard(cardImageRes, rightCardIcon);
+            handleCardsComparison();
         }
+    }
+
+    private void handleCardsComparison() {
+        final String titleMessage;
+        final int titleColor;
+        boolean areCardsOrdered = (rightCardNumber >= leftCardNumber);
+        if (areCardsOrdered) {
+            moveIndicatorButton.setImageResource(R.drawable.like_button);
+            titleMessage = "Cards are ordered fine!";
+            titleColor = getResources().getColor(R.color.algorythms_blue);
+        } else {
+            moveIndicatorButton.setImageResource(R.drawable.dislike_button);
+            titleMessage = "Cards should be switched :(";
+            titleColor = getResources().getColor(R.color.algorythms_red);
+        }
+
+        ObjectAnimator titleFadeOut = AnimationHandler.generateAlphaAnimation(dialogTitle, 1, 0, 300, 20, null);
+        titleFadeOut.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                dialogTitle.setText(titleMessage);
+                dialogTitle.setTextColor(titleColor);
+                ObjectAnimator titleFadeIn = AnimationHandler.generateAlphaAnimation(dialogTitle, 0, 1, 300, 20, null);
+                titleFadeIn.start();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
+        AnimatorSet moveIndicatorButtonPopIn = AnimationHandler.generatePopInAnimation(moveIndicatorButton, 0, 1, 500, 800, new OvershootInterpolator(1));
+        titleFadeOut.start();
+        moveIndicatorButtonPopIn.start();
+
+        if (!areCardsOrdered) {
+            int[] leftCardLocation = new int[2];
+            int[] rightCardLocation = new int[2];
+            leftCardIcon.getLocationOnScreen(leftCardLocation);
+            rightCardIcon.getLocationOnScreen(rightCardLocation);
+            float offset = ((AlgoryhmsMainActivity) getActivity()).convertDpToPixel(25);
+            ObjectAnimator leftCardMove = AnimationHandler.generateXAnimation(leftCardIcon, 0, rightCardLocation[0] - offset, 1000, 0, new OvershootInterpolator(1));
+            ObjectAnimator rightCardMove = AnimationHandler.generateXAnimation(rightCardIcon, 0, -leftCardLocation[0] + offset, 1000, 0, new OvershootInterpolator(1));
+            ObjectAnimator moveIndicatorRotation = AnimationHandler.generateAnimation(moveIndicatorButton, "rotationX", 0, 180, 800, 0, new OvershootInterpolator(1));
+
+            AnimatorSet as = new AnimatorSet();
+            as.setStartDelay(2200);
+            as.playTogether(leftCardMove, rightCardMove, moveIndicatorRotation);
+            as.start();
+        }
+
     }
 
     private void showCard(int cardImageRes, ImageView cardToShow) {
