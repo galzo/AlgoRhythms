@@ -222,7 +222,12 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
                 break;
 
             case R.id.game_intro_screen_instructions_button:
-                Toast.makeText(getActivity(), "Coming soon", Toast.LENGTH_LONG).show();
+                if (gameType.equals(ResourceResolver.BUBBLE_SORT)) {
+                    activity.launchFragment(BubbleSortInstructionsFragment.newInstance(), BubbleSortInstructionsFragment.TAG, R.anim.enter, R.anim.exit);
+                } else {
+                    Toast.makeText(activity, "Coming soon!", Toast.LENGTH_SHORT).show();
+                }
+
                 break;
 
             case R.id.game_intro_screen_nfc_button:
@@ -241,6 +246,8 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
                     dialog = scanDialog;
                     FragmentManager fm = activity.getSupportFragmentManager();
                     dialog.show(fm, BubbleSortScanDialog.TAG);
+                } else {
+                    Toast.makeText(activity, "Coming soon!", Toast.LENGTH_SHORT).show();
                 }
 
                 break;

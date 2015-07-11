@@ -16,6 +16,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnticipateInterpolator;
 import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.BounceInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
@@ -43,13 +44,15 @@ public class BubbleSortInstructionsFragment extends AlgorhythmsFragment implemen
         STAGE1_A,
         STAGE1_B,
         STAGE1_C,
-        SCAN_STAGE1;
+        SCAN_STAGE1,
+        STAGE2_A,
+        STAGE2_B
     }
 
     private View root;
     private TextView text1, text2, text3;
     private ImageButton backButton, nfcButton, nextButton;
-    private ImageView bubbleSortTitle, phoneIcon, disabledNextButton;
+    private ImageView bubbleSortTitle, phoneIcon, disabledNextButton, background;
     private ViewGroup extraContentHolder, buttonsHolder;
     private LinearLayout cardsHolder;
     private HorizontalScrollView cardsScroller;
@@ -94,6 +97,7 @@ public class BubbleSortInstructionsFragment extends AlgorhythmsFragment implemen
         disabledNextButton = (ImageView) root.findViewById(R.id.bubble_sort_instructions_next_disabled);
         bubbleSortTitle = (ImageView) root.findViewById(R.id.bubble_sort_instructions_title);
         phoneIcon = (ImageView) root.findViewById(R.id.bubble_sort_instructions_phone_icon);
+        background = (ImageView) root.findViewById(R.id.bubble_sort_instructions_background);
         cardsHolder = (LinearLayout) root.findViewById(R.id.bubble_sort_instructions_cards_holder);
         cardsScroller = (HorizontalScrollView) root.findViewById(R.id.bubble_sort_instructions_cards_scroller);
         extraContentHolder = (ViewGroup) root.findViewById(R.id.bubble_sort_instructions_extra_content_holder);
@@ -119,20 +123,37 @@ public class BubbleSortInstructionsFragment extends AlgorhythmsFragment implemen
     @Override
     public void onResume() {
         super.onResume();
-        startStage1A();
+        if (stage == InstructionStage.START) {
+            startStage1A();
+        }
     }
 
     private void startStage1A() {
         stage = InstructionStage.STAGE1_A;
-        text1.setText("We will now teach you how to play Bubble-Sort step-by-step");
+        ObjectAnimator backgroundFadeIn = AnimationHandler.generateAlphaAnimation(background, 0, 0.4f, 3000, 0, new DecelerateInterpolator());
+        ObjectAnimator backgroundResizeX = AnimationHandler.generateAnimation(background, "scaleX", 1, 2f, 100000, 0, new DecelerateInterpolator());
+        ObjectAnimator backgroundResizeY = AnimationHandler.generateAnimation(background, "scaleY", 1, 2f, 100000, 0, new DecelerateInterpolator());
+        AnimatorSet backgroundAnim = new AnimatorSet();
+        backgroundAnim.playTogether(backgroundFadeIn, backgroundResizeX, backgroundResizeY);
+        backgroundAnim.setStartDelay(300);
+
+        text1.setText("Instructions");
+        text3.setText("Lean how to play Bubble-Sort step-by-step");
+
+        popInItem(bubbleSortTitle, 1000);
         popInItem(text1, 1200);
+        popInItem(text3, 1400);
+        popInItem(backButton, 1600);
+        popInItem(nextButton, 1800);
+        backgroundAnim.start();
     }
 
     private void startStage1B() {
         stage = InstructionStage.STAGE1_B;
-        replaceText(text1, "Pick a deck of cards (Red or Blue) and shuffle them", 100);
+        popOutItem(text3, 100, null);
+        replaceText(text1, "Pick a deck of cards (Red or Blue) and shuffle them", 250);
         text2.setText("Lay them face-down in a row");
-        popInItem(text2, 600);
+        popInItem(text2, 750);
 
         ViewGroup blankCard1 = (ViewGroup) getLayoutInflater(null).inflate(R.layout.cards_holder_card_item, null);
         ViewGroup blankCard2 = (ViewGroup) getLayoutInflater(null).inflate(R.layout.cards_holder_card_item, null);
@@ -148,10 +169,10 @@ public class BubbleSortInstructionsFragment extends AlgorhythmsFragment implemen
         cardsHolder.addView(blankCard3);
         cardsHolder.addView(blankCard4);
 
-        popInItem(blankCard1, 750);
-        popInItem(blankCard2, 900);
-        popInItem(blankCard3, 1050);
-        popInItem(blankCard4, 1200);
+        popInItem(blankCard1, 900);
+        popInItem(blankCard2, 1050);
+        popInItem(blankCard3, 1200);
+        popInItem(blankCard4, 1350);
     }
 
     private void startStage1C() {
@@ -171,6 +192,10 @@ public class BubbleSortInstructionsFragment extends AlgorhythmsFragment implemen
 
     private void startScanStage1() {
         stage = InstructionStage.BETWEEN_STAGES;
+        phoneAnimator.cancel();
+        if (phoneIcon.getAlpha() != 0) {
+            popOutItem(phoneIcon, 300, null);
+        }
 
         popOutItem(text2, 300, null);
         replaceText(text1, "Please scan the first card", 550);
@@ -214,17 +239,32 @@ public class BubbleSortInstructionsFragment extends AlgorhythmsFragment implemen
         }
     }
 
+    private void startStage2A() {
+        stage = InstructionStage.STAGE2_A;
+        nfcButton.setVisibility(View.GONE);
+        cardsAdapter.hideAllCards();
+        cardsScroller.fullScroll(HorizontalScrollView.FOCUS_LEFT);
+        popOutItem(text2, 100, null);
+        replaceText(text1, "Ok! lets start playing! click the next button", 300);
+    }
+
+    private void startStage2B() {
+        stage = InstructionStage.STAGE2_B;
+        cardsAdapter.flipCard(0, 100);
+        cardsAdapter.flipCard(1, 200);
+    }
+
     private void runPhoneIconAnimation() {
         popInItem(phoneIcon, 1000);
         float toMove = (phoneIcon.getWidth() + (phoneIcon.getWidth()/2));
-        AnimatorSet as = new AnimatorSet();
+        phoneAnimator = new AnimatorSet();
         ObjectAnimator phoneSlide1 = AnimationHandler.generateXAnimation(phoneIcon, 0, toMove, 600, 1600, new AccelerateDecelerateInterpolator());
         ObjectAnimator phoneSlide2 = AnimationHandler.generateXAnimation(phoneIcon, toMove, toMove*2, 600, 400, new AccelerateDecelerateInterpolator());
         ObjectAnimator phoneSlide3 = AnimationHandler.generateXAnimation(phoneIcon, toMove*2, toMove*3, 600, 400, new AccelerateDecelerateInterpolator());
         ObjectAnimator phoneSlide4 = AnimationHandler.generateXAnimation(phoneIcon, toMove*3, 0, 1200, 400, new AnticipateOvershootInterpolator(1));
-        AnimatorSet phonePopOut = AnimationHandler.generatePopOutAnimation(phoneIcon, 1, 0, 500, 200, new AnticipateInterpolator(1));
-        as.playSequentially(phoneSlide1, phoneSlide2, phoneSlide3, phoneSlide4, phonePopOut);
-        as.start();
+        final AnimatorSet phonePopOut = AnimationHandler.generatePopOutAnimation(phoneIcon, 1, 0, 500, 200, new AnticipateInterpolator(1));
+        phoneAnimator.playSequentially(phoneSlide1, phoneSlide2, phoneSlide3, phoneSlide4, phonePopOut);
+        phoneAnimator.start();
     }
 
     private void handleNextSlide() {
@@ -236,6 +276,13 @@ public class BubbleSortInstructionsFragment extends AlgorhythmsFragment implemen
             case STAGE1_B:
                 startStage1C();
                 break;
+
+            case SCAN_STAGE1:
+                startStage2A();
+                break;
+
+            case STAGE2_A:
+                startStage2B();
 
             default:
                 break;
@@ -304,12 +351,12 @@ public class BubbleSortInstructionsFragment extends AlgorhythmsFragment implemen
             return;
         }
 
-        if (scannedCards[cardNumber]) {
+        if (scannedCards[cardNumber-1]) {
             Toast.makeText(getActivity(), "You already scanned that card!", Toast.LENGTH_LONG).show();
             return;
         }
 
-        scannedCards[cardNumber] = true;
+        scannedCards[cardNumber-1] = true;
 
         //we didnt initialize the cardsAdapter yet
         if (cardsAdapter == null) {
@@ -317,11 +364,21 @@ public class BubbleSortInstructionsFragment extends AlgorhythmsFragment implemen
         }
 
         cardsArray.add(cardNumber);
+
+        if (cardsArray.size() == 1) {
+            replaceText(text1, "Scanned one card", 150);
+            text2.setText("Press the next button when you're done scanning");
+            popInItem(text2, 650);
+            disabledNextButton.setVisibility(View.GONE);
+        } else {
+            replaceText(text1, "Scanned " + cardsArray.size() + " cards", 150);
+        }
+
         cardsAdapter.initCardView(cardsArray.size() - 1);
     }
 
     private void popOutItem(View item, int delay, Animator.AnimatorListener listener) {
-        AnimatorSet popOutAnim = AnimationHandler.generatePopOutAnimation(item, 1, 0, 500, delay, new AnticipateInterpolator());
+        AnimatorSet popOutAnim = AnimationHandler.generatePopOutAnimation(item, 1, 0, 500, delay, new AnticipateInterpolator(1));
 
         if (listener != null) {
             popOutAnim.addListener(listener);
@@ -374,7 +431,18 @@ public class BubbleSortInstructionsFragment extends AlgorhythmsFragment implemen
 
     @Override
     public boolean handleNfcScan(String res) {
-        return false;
+        if (stage != InstructionStage.SCAN_STAGE1) {
+            return true;
+        }
+
+        Bundle scanResult = parseScanResult(res);
+        if (scanResult == null) {
+            Toast.makeText(getActivity(), "Please scan a valid game card", Toast.LENGTH_LONG).show();
+            return true;
+        }
+
+        addCard(scanResult);
+        return true;
     }
 
 
