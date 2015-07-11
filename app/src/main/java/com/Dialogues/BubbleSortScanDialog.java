@@ -4,9 +4,12 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Typeface;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +22,8 @@ import com.algorythmsteam.algorythms.AlgoryhmsMainActivity;
 import com.algorythmsteam.algorythms.R;
 import com.handlers.AnimationHandler;
 import com.handlers.ResourceResolver;
+
+import java.io.IOException;
 
 
 public class BubbleSortScanDialog extends AlgorhythmsDialogFragment implements View.OnClickListener {
@@ -39,6 +44,7 @@ public class BubbleSortScanDialog extends AlgorhythmsDialogFragment implements V
     private ScanState state;
     private String cardsType;
     private int leftCardNumber, rightCardNumber;
+    private MediaPlayer mediaPlayer;
 
     public BubbleSortScanDialog() {
         //required empty constructor
@@ -271,6 +277,37 @@ public class BubbleSortScanDialog extends AlgorhythmsDialogFragment implements V
             as.start();
         }
 
+
+        if (mediaPlayer == null) {
+            mediaPlayer = new MediaPlayer();
+        }
+
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+        }
+
+        String playSound = (areCardsOrdered)? "correct1.mp3" : "wrong.mp3";
+        try {
+            mediaPlayer.reset();
+            AssetFileDescriptor afd;
+            afd = getActivity().getAssets().openFd(playSound);
+            mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    if (mp == mediaPlayer) {
+                        mediaPlayer.start();
+                    }
+                }
+            });
+            mediaPlayer.prepare();
+        }
+
+        catch (IOException e) {
+            mediaPlayer = null;
+            Log.e(TAG, "error loading the media player");
+            Log.e(TAG, e.getMessage());
+        }
     }
 
     private void showCard(int cardImageRes, ImageView cardToShow) {
@@ -293,5 +330,16 @@ public class BubbleSortScanDialog extends AlgorhythmsDialogFragment implements V
     @Override
     public void onClick(View view) {
         dismiss();
+    }
+
+    @Override
+    public void dismiss() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+        
+        super.dismiss();
     }
 }

@@ -30,6 +30,7 @@ import com.handlers.AnimationHandler;
 import com.handlers.ResourceResolver;
 
 import java.io.IOException;
+import java.util.Random;
 
 public class GameIntroFragment extends AlgorhythmsFragment implements View.OnClickListener, AlgorhythmsDialogFragment.DialogClosedCallback {
     public static final String TAG = "GameIntroFragment";
@@ -312,8 +313,16 @@ public class GameIntroFragment extends AlgorhythmsFragment implements View.OnCli
             mediaPlayer.stop();
         }
 
-        String playSound = (clickedButton.getId() == R.id.game_intro_screen_like_button)?
-                "yay.mp3" : "boo.mp3";
+        String playSound;
+        if (clickedButton.getId() == R.id.game_intro_screen_like_button) {
+            Random r = new Random();
+            int Low = 1;
+            int High = 3;
+            int randNum = r.nextInt(High-Low) + Low;
+            playSound = (randNum == 1)? "correct1.mp3" : "correct2.mp3";
+        } else {
+            playSound = "wrong.mp3";
+        }
 
         try {
             mediaPlayer.reset();

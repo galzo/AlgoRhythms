@@ -250,6 +250,7 @@ public class BubbleSortInstructionsFragment extends AlgorhythmsFragment implemen
 
     private void startStage2B() {
         stage = InstructionStage.STAGE2_B;
+        cardsScroller.fullScroll(HorizontalScrollView.FOCUS_LEFT);
         cardsAdapter.flipCard(0, 100);
         cardsAdapter.flipCard(1, 200);
     }

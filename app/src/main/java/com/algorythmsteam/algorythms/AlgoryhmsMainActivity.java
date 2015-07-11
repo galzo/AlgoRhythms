@@ -17,15 +17,13 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.handlers.NdefReader;
 import com.handlers.ResourceResolver;
-
-import java.util.ArrayList;
-
 
 public class AlgoryhmsMainActivity extends ActionBarActivity implements QRScanFragment.QRScanCallback {
     public static final String TAG = "AlgoryhmsMainActivity";
@@ -39,6 +37,7 @@ public class AlgoryhmsMainActivity extends ActionBarActivity implements QRScanFr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_algoryhms_main);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) {
