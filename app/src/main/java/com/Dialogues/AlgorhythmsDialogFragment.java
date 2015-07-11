@@ -1,4 +1,4 @@
-package com.algorythmsteam.algorythms;
+package com.Dialogues;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -14,6 +14,8 @@ import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Toast;
 
+import com.algorythmsteam.algorythms.AlgorhythmsFragment;
+import com.algorythmsteam.algorythms.AlgoryhmsMainActivity;
 import com.handlers.AnimationHandler;
 
 public abstract class AlgorhythmsDialogFragment extends DialogFragment {

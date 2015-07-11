@@ -1,22 +1,22 @@
-package com.algorythmsteam.algorythms;
+package com.Dialogues;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.BounceInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.TextView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.algorythmsteam.algorythms.AlgoryhmsMainActivity;
+import com.algorythmsteam.algorythms.R;
 import com.handlers.AnimationHandler;
 import com.handlers.ResourceResolver;
 

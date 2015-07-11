@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.res.AssetFileDescriptor;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -24,6 +23,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.Dialogues.AlgorhythmsDialogFragment;
+import com.Dialogues.BubbleSortScanDialog;
+import com.Dialogues.QuickSortScanDialog;
 import com.handlers.AnimationHandler;
 import com.handlers.ResourceResolver;
 

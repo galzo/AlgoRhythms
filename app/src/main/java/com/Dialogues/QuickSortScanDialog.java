@@ -1,4 +1,4 @@
-package com.algorythmsteam.algorythms;
+package com.Dialogues;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.support.v4.app.DialogFragment;
 import android.widget.Toast;
 
+import com.algorythmsteam.algorythms.R;
 import com.handlers.AnimationHandler;
 import com.handlers.ResourceResolver;
 
