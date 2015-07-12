@@ -52,11 +52,11 @@ public class AlgoryhmsMainActivity extends ActionBarActivity implements QRScanFr
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//        AlgoryhmsMainFragment frag = new AlgoryhmsMainFragment();
-        GameIntroFragment frag = GameIntroFragment.newInstance(ResourceResolver.BUBBLE_SORT);
+        AlgoryhmsMainFragment frag = new AlgoryhmsMainFragment();
+//        GameIntroFragment frag = GameIntroFragment.newInstance(ResourceResolver.BUBBLE_SORT);
 //        BubbleSortInstructionsFragment frag = BubbleSortInstructionsFragment.newInstance();
         _currFrag = frag;
-        fragmentTransaction.add(R.id.main_activity_fragment_container, frag, BubbleSortInstructionsFragment.TAG);
+        fragmentTransaction.add(R.id.main_activity_fragment_container, frag, AlgoryhmsMainFragment.TAG);
         fragmentTransaction.commit();
     }
 

@@ -38,6 +38,30 @@
             android:layout_marginRight="13dp"/>
 
         <ImageButton
+            android:id="@+id/bubble_sort_instructions_dislike_button"
+            android:background="@android:color/transparent"
+            android:alpha="0"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            android:src="@drawable/dislike_button"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginRight="13dp"/>
+
+        <ImageButton
+            android:id="@+id/bubble_sort_instructions_like_button"
+            android:background="@android:color/transparent"
+            android:alpha="0"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            android:src="@drawable/like_button"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginRight="13dp"/>
+
+        <ImageButton
             android:id="@+id/bubble_sort_instructions_nfc_button"
             android:background="@android:color/transparent"
             android:adjustViewBounds="true"
@@ -48,6 +72,7 @@
             android:visibility="gone"/>
 
         <FrameLayout
+            android:id="@+id/bubble_sort_instructions_next_button_container"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_marginLeft="13dp"
@@ -141,20 +166,20 @@
 
     <TextView
         android:id="@+id/bubble_sort_instructions_text2"
-        android:layout_width="260dp"
+        android:layout_width="270dp"
         android:layout_height="wrap_content"
         android:alpha="0"
         android:gravity="center"
         android:layout_below="@id/bubble_sort_instructions_text1"
         android:layout_centerHorizontal="true"
         android:text="text2"
-        android:textSize="22dp"
-        android:layout_marginTop="30dp"
+        android:textSize="21dp"
+        android:layout_marginTop="25dp"
         android:textColor="@color/algorythms_blue"/>
 
     <TextView
         android:id="@+id/bubble_sort_instructions_text3"
-        android:layout_width="260dp"
+        android:layout_width="270dp"
         android:layout_height="wrap_content"
         android:alpha="0"
         android:gravity="center"
@@ -162,7 +187,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="30dp"
         android:text="text3"
-        android:textSize="22dp"
+        android:textSize="21dp"
         android:textColor="@color/algorythms_blue"/>
 
 </RelativeLayout>

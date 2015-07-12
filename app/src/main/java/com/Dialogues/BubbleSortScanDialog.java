@@ -339,7 +339,7 @@ public class BubbleSortScanDialog extends AlgorhythmsDialogFragment implements V
             mediaPlayer.release();
             mediaPlayer = null;
         }
-        
+
         super.dismiss();
     }
 }

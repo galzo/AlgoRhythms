@@ -47,14 +47,6 @@ public class BubbleSortCardsAdapter extends BaseAdapter {
             View card = getView(i, null, cardsHolder);
             cardsHolder.addView(card);
         }
-
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                cardsScroller.fullScroll(HorizontalScrollView.FOCUS_RIGHT);
-            }
-        }, 500);
     }
 
     public void initCardView(int position) {
@@ -154,7 +146,8 @@ public class BubbleSortCardsAdapter extends BaseAdapter {
 
         final ImageView cardIcon = (ImageView) v.findViewById(R.id.cards_holder_card_image);
         int cardNumber = cardNumbers.get(position);
-        cardIcon.setImageResource(ResourceResolver.resolveCardImage(cardsType, cardNumber));
+        int cardResource = (hiddenCards[position])? ResourceResolver.resolveBlankCardImage(cardsType) : ResourceResolver.resolveCardImage(cardsType, cardNumber);
+        cardIcon.setImageResource(cardResource);
 
         return v;
     }
